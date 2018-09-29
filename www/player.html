@@ -1,0 +1,20 @@
+  
+<html>
+<head>
+<title>Acestream Player</title>
+<link href='https://unpkg.com/video.js/dist/video-js.css' rel='stylesheet'>
+<script src='https://unpkg.com/video.js/dist/video.js'></script>
+<script src='https://unpkg.com/videojs-contrib-hls/dist/videojs-contrib-hls.js'></script>
+</head>
+<body>
+<video style='margin:auto' id='my_video_1' class='video-js vjs-default-skin' controls preload='auto' width='640' height='360' data-setup='{}'></video>
+<script>
+const player = videojs('my_video_1');
+player.src({
+src: '/segments/acestream.m3u8',
+type: 'application/x-mpegURL'
+});
+</script>
+</body>
+</html>
+
