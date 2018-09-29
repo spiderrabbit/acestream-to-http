@@ -8,28 +8,48 @@ This script serves an acestream as a progressive (HLS) video download via a .m3u
 I've also written an install script that takes a fresh Ubuntu 18.04 install and does it all for you. Only takes 5:30 mins to spin up a fresh virtual server from e.g. Digital Ocean and have it serving Acestreams.
 
 INSTRUCTIONS TO SET UP A FRESH DIGITAL OCEAN VIRTUAL SERVER (Easy)
+
 After logging in click on Droplets - Create
+
 Distribution - Ubuntu 18.04
+
 Standard droplet 1GB 1vCPU 25GB 1TB transfer
+
 Choose a datacenter near you
+
 Hit create (note the droplet name- you can change this if required)
+
 Wait whilst it spins up
+
 Use Putty or your favourite ssh client to log in to the server using the IP address that it has been assigned
 username is root, password will be emailed to you- you'll be required to change this at first run
 
+
 INSTRUCTIONS TO SET UP PROXY ON A FRESH 18.04 SERVER
+
 ssh in as root with Putty or your favorite client and run
+
 bash $(curl -s https://raw.githubusercontent.com/spiderrabbit/acestream-to-http/master/server_install.sh)
+
 The install script will ask for a password for username "acestream", your server IP/Port and webui user/password
+
 Done! - the script is available at r/http://SERVER*:PORT/*
 
 NB I'm sure this will work with AWS too but not tested!
 
+
 INSTRUCTIONS TO SET UP ON AN EXISTING LINUX SERVER (Advanced)
+
 Get script from https://github.com/spiderrabbit/acestream-to-http/
+
 Make sure dependencies are installed (ffmpeg, vlc, webserver, psutil python module)
+
 Install acestream engine (snap install?)
+
 Alter script variables (username, password, ip, port, location of web root directory) to suit
+
 Alter paths in script to point to your dependency locations
+
 Make sure web root directory has sub directories "listings" and "segments" and is writeable by user running script
+
 Run as python acestream_to_http.py
