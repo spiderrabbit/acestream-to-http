@@ -19,7 +19,7 @@ username is root, password will be emailed to you- you'll be required to change 
 
 INSTRUCTIONS TO SET UP PROXY ON A FRESH 18.04 SERVER
 ssh in as root with Putty or your favorite client and run
-curl -s https://pastebin.com/raw/78A6FTsW | tr -d '\r' > /tmp/install.sh ; bash /tmp/install.sh
+bash $(curl -s https://raw.githubusercontent.com/spiderrabbit/acestream-to-http/master/server_install.sh)
 The install script will ask for a password for username "acestream", your server IP/Port and webui user/password
 Done! - the script is available at r/http://SERVER*:PORT/*
 
