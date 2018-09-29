@@ -63,7 +63,7 @@ type: 'application/x-mpegURL'
 </body>
 </html>
 " > /home/acestream/acestream_to_http/www/player.html 
-sudo -u acestream wget https://pastebin.com/raw/T2DMdDRj -O /home/acestream/acestream_to_http/acestream_to_http.py
+sudo -u acestream wget https://raw.githubusercontent.com/spiderrabbit/acestream-to-http/master/acestream_to_http.py -O /home/acestream/acestream_to_http/acestream_to_http.py
 sed -i "s/SERVER_IP = \"127.0.0.1\"/SERVER_IP = \"$serverip\"/g" /home/acestream/acestream_to_http/acestream_to_http.py
 sed -i "s/PORT = \"4523\"/PORT = \"$port\"/g" /home/acestream/acestream_to_http/acestream_to_http.py
 sed -i "s/USERNAME = \"user\"/USERNAME = \"$webusername\"/g" /home/acestream/acestream_to_http/acestream_to_http.py
