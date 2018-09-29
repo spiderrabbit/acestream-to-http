@@ -40,16 +40,18 @@ NB I'm sure this will work with AWS too but not tested!
 
 INSTRUCTIONS TO SET UP ON AN EXISTING LINUX SERVER (Advanced)
 
-Get script from https://github.com/spiderrabbit/acestream-to-http/
+You need a web server already installed to serve the video files - Nginx or Apache
 
-Make sure dependencies are installed (ffmpeg, vlc, webserver, psutil python module)
+Get script from https://github.com/spiderrabbit/acestream-to-http/ (git clone or download zip file)
+
+Make sure dependencies are installed (ffmpeg, vlc, psutil python module)
 
 Install acestream engine (snap install?)
 
-Alter script variables (username, password, ip, port, location of web root directory) to suit
+Alter script variables (username, password, ip, port, location of webserver directory) to suit
 
 Alter paths in script to point to your dependency locations
 
-Make sure web root directory has sub directories "listings" and "segments" and is writeable by user running script
+Make sure webserver directory has sub directories "listings" and "segments" and is writeable by user running script. If it's not running on port 80 then update the VLC command that generates the .m3u8 file to suit.
 
 Run as python acestream_to_http.py
