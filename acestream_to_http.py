@@ -102,6 +102,7 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
       for process in psutil.process_iter(): 
         if  process.name() == "acestreamengine" or ('/usr/bin/vlc' in process.cmdline() and '--live-caching' in process.cmdline()):
           process.kill()
+      #ffmpeg has needed -bsf:a aac_adtstoasc option to fix  PES packet size mismatch, Error parsing ADTS frame header errors
       file_save_status = ["ffmpeg", "-y", "-i", "/tmp/acestream.mkv", "-c:v", "copy", "-c:a", "copy", "-movflags", "faststart", dir_path+"/listings/"+savefilename+".mp4"]
       subprocess.Popen(file_save_status)
       pid_stat_url = None
