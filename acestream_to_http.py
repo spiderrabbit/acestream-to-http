@@ -260,7 +260,7 @@ body{
         disabledtext[0] = "disabled style='opacity: 0.4;'"
         disabledtext[1] = "disabled style='opacity: 0.4;'"
         acestream_status_text = ""
-      self.wfile.write('<div><form method="GET" action="/openpid/" id="openpid" style="display:inline"><input type=text name="pid" size=50 placeholder="Acestream ID" style="margin-bottom:10px;" %s><br>' % disabledtext[0])   
+      self.wfile.write('<div><form method="GET" action="/openpid/" id="openpid" style="display:inline"><input type=text name="pid" placeholder="Acestream ID" style="margin-bottom:10px;width:400px;" %s><br>' % disabledtext[0])   
       self.wfile.write("""
         <button class='button buttonloading' %s onclick='this.style.display="none"; document.getElementById("button_ace_starting").style.display=""; document.getElementById("openpid").submit()'>
         <i class='fa fa-stop-circle'></i>Start Acestream</button>
@@ -315,7 +315,7 @@ body{
       self.wfile.write('''
        <div>
        <form method="GET" action="/savefile/" id="savefile">
-       <input type=text name="savefilename" size=50 placeholder="Save filename" style="margin-top:20px; margin-bottom:10px;" %s><br />
+       <input type=text name="savefilename" placeholder="Save filename" style="margin-top:20px; margin-bottom:10px;width:400px;" %s><br />
        <button class='button buttonloading' %s onclick='document.getElementById("savefile").submit()'>
        <i class='fa fa-save'></i>Save Recording</button>
        </form>
