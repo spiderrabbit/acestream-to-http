@@ -7,7 +7,6 @@ USERNAME = "user"
 PASSWORD = "acestream"
 dir_path = os.path.dirname(os.path.realpath(__file__))+"/www"  #change this to where you want to store files. Must have "listings" and "segements" subdirectories writeable by script
 
-pid_stat_url = None
 temp_stream_saved = False
 file_save_status = []
 key = ""
@@ -23,7 +22,10 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     self.end_headers()
   
   def do_GET(self):
-    global pid_stat_url, temp_stream_saved, file_save_status, key, streamtimer, dir_path
+    global temp_stream_saved, file_save_status, key, streamtimer, dir_path
+    if not os.path.isfile('/tmp/pid_stat_url'):
+      with open('/tmp/pid_stat_url', 'w') as f: f.write(json.dumps(None))
+    with open('/tmp/pid_stat_url', 'r') as f: pid_stat_url = json.loads(f.read())
     path = self.path.split("/")
     if path[1] != 'segments':#allow non-password access to live stream segments
       if self.headers.getheader('Authorization') == None:
@@ -54,6 +56,7 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             if process.name() == "acestreamengine" or ('/usr/bin/vlc' in process.cmdline() and '--live-caching' in process.cmdline()):
               process.kill()
           pid_stat_url = None
+          with open('/tmp/pid_stat_url', 'w') as f: f.write(json.dumps(pid_stat_url))
           if os.path.isfile(dir_path+"/listings/LIVE.strm"):
             os.remove(dir_path+"/listings/LIVE.strm")
         elif path[2] == 'stopstream':
@@ -65,6 +68,7 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             sr = requests.get(json.loads(pid_stat_url[3])['response']['command_url']+"?method=stop")
             #print sr.text
           pid_stat_url = None
+          with open('/tmp/pid_stat_url', 'w') as f: f.write(json.dumps(pid_stat_url))
           if os.path.isfile(dir_path+"/listings/LIVE.strm"):
             os.remove(dir_path+"/listings/LIVE.strm")
 
@@ -87,6 +91,7 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
              if  process.name() == "acestreamengine" or ('/usr/bin/vlc' in process.cmdline() and '--live-caching' in process.cmdline()):
                process.kill()
           pid_stat_url = None
+          with open('/tmp/pid_stat_url', 'w') as f: f.write(json.dumps(pid_stat_url))
           if os.path.isfile(dir_path+"/listings/LIVE.strm"):
             os.remove(dir_path+"/listings/LIVE.strm")
           temp_stream_saved = True
@@ -106,6 +111,7 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
       file_save_status = ["ffmpeg", "-y", "-i", "/tmp/acestream.mkv", "-c:v", "copy", "-c:a", "copy", "-movflags", "faststart", "-bsf:a", "aac_adtstoasc", dir_path+"/listings/"+savefilename+".mp4"]
       subprocess.Popen(file_save_status)
       pid_stat_url = None
+      with open('/tmp/pid_stat_url', 'w') as f: f.write(json.dumps(pid_stat_url))
       temp_stream_saved = False
       self.send_response(302)
       self.send_header('Location',"/")
@@ -116,6 +122,7 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         if  '/usr/bin/vlc' in process.cmdline() and '--live-caching' in process.cmdline():
           process.kill()
       pid_stat_url = None
+      with open('/tmp/pid_stat_url', 'w') as f: f.write(json.dumps(pid_stat_url))
       stream_pid = False
       for f in path[2].split("?")[1].split("&"):
         if f.split("=")[0] == "pid":
@@ -124,6 +131,7 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
       if stream_pid:
         r = requests.get('http://127.0.0.1:6878/ace/getstream?format=json&sid={0}&id={1}'.format(stream_uid, stream_pid))
         pid_stat_url = [stream_pid, json.loads(r.text)['response']['stat_url'], json.loads(r.text)['response']['playback_url'], r.text, stream_pid]
+        with open('/tmp/pid_stat_url', 'w') as f: f.write(json.dumps(pid_stat_url))
       
       #start stream timer
       streamtimer = time.time()
