@@ -58,4 +58,4 @@ systemctl enable acestream_to_http.service
 systemctl stop acestream_to_http.service
 systemctl start acestream_to_http.service
 
-echo "server running at http://$serverip:$port ( login $webusername:$webpassword )"
+echo server running at http://$serverip:$port - login $webusername:$webpassword 
