@@ -19,7 +19,10 @@ if [ -x $(id -u acestream) ] ; then
   chown -R acestream:acestream /home/acestream
 fi
 
-serverip=$(curl http://ipinfo.io/ip)
+serverip=$(grep "SERVER_IP = " /home/acestream/acestream-to-http-master/acestream_to_http.ap | cut -d"=" -f2 | sed 's/[^0-9a-zA-Z\.]//g')
+if [ -z "$serverip" ]; then
+  serverip=$(curl http://ipinfo.io/ip)
+fi
 echo -n "Server domain name or IP address [$serverip]: "
 read serverip_temp
 if [ -n "$serverip_temp" ] ; then serverip=$serverip_temp ; fi
