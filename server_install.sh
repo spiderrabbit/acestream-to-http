@@ -42,7 +42,7 @@ pip install requests psutil
 snap install acestreamplayer
 
 sudo -u acestream wget https://github.com/spiderrabbit/acestream-to-http/archive/master.zip -O /tmp/master.zip
-sudo -u acestream unzip -o /tmp/master.zip -d /home/acestream/
+sudo -u acestream unzip -f /tmp/master.zip -d /home/acestream/
 
 sed -i "s/SERVER_IP = \"127.0.0.1\"/SERVER_IP = \"$serverip\"/g" /home/acestream/acestream-to-http-master/acestream_to_http.py
 sed -i "s/PORT = \"4523\"/PORT = \"$port\"/g" /home/acestream/acestream-to-http-master/acestream_to_http.py
