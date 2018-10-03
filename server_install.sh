@@ -37,20 +37,19 @@ read webpassword_temp
 if [ -n "$webpassword_temp" ] ; then webpassword=$webpassword_temp ; fi
 
 apt update
-apt install -y vlc ffmpeg python-pip curl nginx unzip
+apt install -y vlc ffmpeg python-pip curl nginx unzip php7.2-fpm
 pip install requests psutil
 snap install acestreamplayer
 
 sudo -u acestream wget https://github.com/spiderrabbit/acestream-to-http/archive/master.zip -O /tmp/master.zip
-sudo -u acestream unzip /tmp/master.zip -d /home/acestream/
+sudo -u acestream unzip -o /tmp/master.zip -d /home/acestream/
 
 sed -i "s/SERVER_IP = \"127.0.0.1\"/SERVER_IP = \"$serverip\"/g" /home/acestream/acestream-to-http-master/acestream_to_http.py
 sed -i "s/PORT = \"4523\"/PORT = \"$port\"/g" /home/acestream/acestream-to-http-master/acestream_to_http.py
 sed -i "s/USERNAME = \"user\"/USERNAME = \"$webusername\"/g" /home/acestream/acestream-to-http-master/acestream_to_http.py
 sed -i "s/PASSWORD = \"acestream\"/PASSWORD = \"$webpassword\"/g" /home/acestream/acestream-to-http-master/acestream_to_http.py
 
-cp /home/acestream/acestream-to-http-master/conf/acestream_to_http.service > /lib/systemd/system/acestream_to_http.service
-
+cp /home/acestream/acestream-to-http-master/conf/acestream_to_http.service /lib/systemd/system/acestream_to_http.service
 cp /home/acestream/acestream-to-http-master/conf/nginx.conf /etc/nginx/sites-enabled/default
 service nginx restart
 
