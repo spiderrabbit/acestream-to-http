@@ -123,6 +123,7 @@ print matchname, chosenstream
 stream_uid = hashlib.sha1(chosenstream).hexdigest()
 r = requests.get('http://127.0.0.1:6878/ace/getstream?format=json&sid={0}&id={1}'.format(stream_uid, chosenstream))
 response = json.loads(r.text)
+
 if 'response' in response:
   if response['response'] is not None:
     time.sleep(3)
@@ -131,6 +132,8 @@ if 'response' in response:
     if 'response' in response_stream:
       if 'status' in response_stream['response']:
         if response_stream['response']['status']=='dl':
+          pid_stat_url = [chosenstream, response['response']['stat_url'], response['response']['playback_url'], r.text, chosenstream]
+          with open('/tmp/pid_stat_url', 'w') as f: f.write(json.dumps(pid_stat_url))
           #check is playing, if so transcode approriate length
           time.sleep(2)
           subprocess.Popen(["cvlc", response['response']['playback_url'], "--sout", "#std{access=file,mux=ts,dst='/tmp/acestream.mkv'}"])
@@ -141,3 +144,4 @@ for process in psutil.process_iter():
     
 file_save_status = ["ffmpeg", "-y", "-i", "/tmp/acestream.mkv", "-c:v", "copy", "-c:a", "copy", "-movflags", "faststart", "-bsf:a", "aac_adtstoasc", dir_path+"/listings/"+savefilename+".mp4"]
 subprocess.Popen(file_save_status)
+with open('/tmp/pid_stat_url', 'w') as f: f.write(json.dumps(None))
