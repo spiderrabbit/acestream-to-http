@@ -20,7 +20,7 @@ if [ -x $(id -u acestream) ] ; then
 fi
 
 serverip=$(curl http://ipinfo.io/ip)
-echo -n "Server IP address [$serverip]: "
+echo -n "Server domain name or IP address [$serverip]: "
 read serverip_temp
 if [ -n "$serverip_temp" ] ; then serverip=$serverip_temp ; fi
 port=4523
@@ -51,6 +51,7 @@ sed -i "s/PASSWORD = \"acestream\"/PASSWORD = \"$webpassword\"/g" /home/acestrea
 
 cp /home/acestream/acestream-to-http-master/conf/acestream_to_http.service /lib/systemd/system/acestream_to_http.service
 cp /home/acestream/acestream-to-http-master/conf/nginx.conf /etc/nginx/sites-enabled/default
+rm -f /tmp/pid_stat_url
 service nginx restart
 
 systemctl daemon-reload
