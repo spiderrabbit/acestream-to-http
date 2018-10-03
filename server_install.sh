@@ -38,7 +38,7 @@ if [ -n "$webpassword_temp" ] ; then webpassword=$webpassword_temp ; fi
 
 apt update
 apt install -y vlc ffmpeg python-pip curl nginx unzip php7.2-fpm
-pip install requests psutil
+pip install requests psutil mediainfo
 snap install acestreamplayer
 
 sudo -u acestream wget https://github.com/spiderrabbit/acestream-to-http/archive/master.zip -O /tmp/master.zip

@@ -1,6 +1,7 @@
 import SimpleHTTPServer, SocketServer, requests, subprocess
 import os, psutil, time, sys, base64
 import hashlib, json
+from MediaInfo import MediaInfo
 PORT = "4523"
 SERVER_IP = "127.0.0.1"
 USERNAME = "user"
@@ -49,7 +50,7 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
       
     if path[1] == 'engine':
       if len(path) == 3:
-        if path[2] == 'start':
+        if path[2] == 'start' and enginerunning == False:
           proc1 = subprocess.Popen(["/snap/bin/acestreamplayer.engine", "--client-console", "--bind-all", "--live-cache-type", "disk", "--live-disk-cache-size", "1000000000"])
         elif path[2] == 'stop':
           for process in psutil.process_iter(): 
@@ -107,8 +108,14 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
       for process in psutil.process_iter(): 
         if  process.name() == "acestreamengine" or ('/usr/bin/vlc' in process.cmdline() and '--live-caching' in process.cmdline()):
           process.kill()
-      #ffmpeg has needed -bsf:a aac_adtstoasc option to fix  PES packet size mismatch, Error parsing ADTS frame header errors
-      file_save_status = ["ffmpeg", "-y", "-i", "/tmp/acestream.mkv", "-c:v", "copy", "-c:a", "copy", "-movflags", "faststart", "-bsf:a", "aac_adtstoasc", dir_path+"/listings/"+savefilename+".mp4"]
+      #ffmpeg has needed -bsf:a aac_adtstoasc option to fix  PES packet size mismatch, Error parsing ADTS frame header errors only for AAC audio
+      try:
+        if info.getInfo()['audioCodec']=="AAC":
+          file_save_status = ["ffmpeg", "-y", "-i", "/tmp/acestream.mkv", "-c:v", "copy", "-c:a", "copy", "-movflags", "faststart", "-bsf:a", "aac_adtstoasc", dir_path+"/listings/"+matchname+".mp4"]
+        else:
+          file_save_status = ["ffmpeg", "-y", "-i", "/tmp/acestream.mkv", "-c:v", "copy", "-c:a", "copy", "-movflags", "faststart", dir_path+"/listings/"+matchname+".mp4"]
+      except:
+        file_save_status = ["ffmpeg", "-y", "-i", "/tmp/acestream.mkv", "-c:v", "copy", "-c:a", "copy", "-movflags", "faststart", dir_path+"/listings/"+matchname+".mp4"]
       subprocess.Popen(file_save_status)
       pid_stat_url = None
       with open('/tmp/pid_stat_url', 'w') as f: f.write(json.dumps(pid_stat_url))
