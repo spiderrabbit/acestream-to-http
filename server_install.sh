@@ -1,6 +1,6 @@
 #GENERAL INSTALL INSTRUCTIONS
 #copy/paste and run the line below as root user in the ssh client (without the initial hash/ pound!):
-#wget https://raw.githubusercontent.com/spiderrabbit/acestream-to-http/master/server_install.sh ; bash server_install.sh
+#wget https://raw.githubusercontent.com/spiderrabbit/acestream-to-http/master/server_install.sh -O /tmp/server_install.sh; bash /tmp/server_install.sh
 
 if [ -x $(id -u acestream) ] ; then 
   echo -n "Enter system acestream user password: "
