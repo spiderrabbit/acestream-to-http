@@ -1,0 +1,12 @@
+[Unit]
+Description=Acestream Service
+After=multi-user.target
+Conflicts=getty@tty1.service
+
+[Service]
+Type=simple
+User=acestream
+ExecStart=/usr/bin/python /home/acestream/acestream-to-http-master/acestream_to_http.py
+
+[Install]
+WantedBy=multi-user.target
