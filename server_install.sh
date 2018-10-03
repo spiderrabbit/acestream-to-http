@@ -19,7 +19,7 @@ if [ -x $(id -u acestream) ] ; then
   chown -R acestream:acestream /home/acestream
 fi
 
-serverip=$(grep "SERVER_IP = " /home/acestream/acestream-to-http-master/acestream_to_http.ap | cut -d"=" -f2 | sed 's/[^0-9a-zA-Z\.]//g')
+serverip=$(grep "SERVER_IP = " /home/acestream/acestream-to-http-master/acestream_to_http.py | cut -d"=" -f2 | sed 's/[^0-9a-zA-Z\.]//g')
 if [ -z "$serverip" ]; then
   serverip=$(curl http://ipinfo.io/ip)
 fi
