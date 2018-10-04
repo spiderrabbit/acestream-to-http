@@ -40,7 +40,7 @@ read webpassword_temp
 if [ -n "$webpassword_temp" ] ; then webpassword=$webpassword_temp ; fi
 
 apt update
-apt install -y vlc ffmpeg python-pip curl nginx unzip php7.2-fpm
+apt install -y vlc ffmpeg python-pip curl nginx unzip php7.2-fpm ufw
 pip install requests psutil mediainfo
 snap install acestreamplayer
 
@@ -61,5 +61,16 @@ systemctl daemon-reload
 systemctl enable acestream_to_http.service
 systemctl stop acestream_to_http.service
 systemctl start acestream_to_http.service
+
+#set up firewall
+#acestream engine 62062 API commands
+#acestream engine 6878 http api control
+#acestream engine 8621 listening port
+ufw allow 22
+ufw allow 80
+ufw allow 443
+ufw allow 8621
+ufw enable
+
 
 echo server running at http://$serverip:$port - login $webusername:$webpassword 

@@ -51,7 +51,7 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     if path[1] == 'engine':
       if len(path) == 3:
         if path[2] == 'start' and enginerunning == False:
-          proc1 = subprocess.Popen(["/snap/bin/acestreamplayer.engine", "--client-console", "--bind-all", "--live-cache-type", "disk", "--live-disk-cache-size", "1000000000"])
+          proc1 = subprocess.Popen(["/snap/bin/acestreamplayer.engine", "--client-console", "--live-cache-type", "disk", "--live-disk-cache-size", "1000000000"])
         elif path[2] == 'stop':
           for process in psutil.process_iter(): 
             if process.name() == "acestreamengine" or ('/usr/bin/vlc' in process.cmdline() and '--live-caching' in process.cmdline()):
