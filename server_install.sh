@@ -76,6 +76,15 @@ systemctl enable acestream_to_http.service
 systemctl stop acestream_to_http.service
 systemctl start acestream_to_http.service
 
+# if setting up vpn then these commands allow ssh access
+#https://serverfault.com/questions/659955/allowing-ssh-on-a-server-with-an-active-openvpn-client
+# ip rule add from $(ip route get 1 | grep -Po '(?<=src )(\S+)') table 128
+# ip route add table 128 to $(ip route get 1 | grep -Po '(?<=src )(\S+)')/32 dev $(ip -4 route ls | grep default | grep -Po '(?<=dev )(\S+)')
+# ip route add table 128 default via $(ip -4 route ls | grep default | grep -Po '(?<=via )(\S+)')
+#route del default gw x.x.x.x
+#echo nameserver 8.8.8.8 > /etc/resolv.conf 
+
+  
 #set up firewall
 #acestream engine 62062 API commands
 #acestream engine 6878 http api control
@@ -84,6 +93,7 @@ ufw allow 22
 ufw allow $httpport
 ufw allow 4523
 ufw allow 8621
+ufw allow 1194/udp
 yes | ufw enable
 
 
