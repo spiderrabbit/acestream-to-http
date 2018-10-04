@@ -23,6 +23,7 @@ serverip=$(grep "SERVER_IP = " /home/acestream/acestream-to-http-master/acestrea
 if [ -z "$serverip" ]; then
   serverip=$(curl http://ipinfo.io/ip)
 fi
+echo "If you wish to use HTTPS then please use a domain name rather than IP address"
 echo -n "Server domain name or IP address [$serverip]: "
 read serverip_temp
 if [ -n "$serverip_temp" ] ; then serverip=$serverip_temp ; fi
@@ -39,6 +40,8 @@ echo -n "Web password [$webpassword]: "
 read webpassword_temp
 if [ -n "$webpassword_temp" ] ; then webpassword=$webpassword_temp ; fi
 
+add-apt-repository --yes ppa:certbot/certbot
+apt -y install python-certbot-nginx
 apt update
 apt install -y vlc ffmpeg python-pip curl nginx unzip php7.2-fpm ufw
 pip install requests psutil mediainfo
@@ -54,9 +57,20 @@ sed -i "s/PASSWORD = \"acestream\"/PASSWORD = \"$webpassword\"/g" /home/acestrea
 
 cp /home/acestream/acestream-to-http-master/conf/acestream_to_http.service /lib/systemd/system/acestream_to_http.service
 cp /home/acestream/acestream-to-http-master/conf/nginx.conf /etc/nginx/sites-enabled/default
+sed -i "s/server_name _;/server_name $serverip _;/g" /etc/nginx/sites-available/default
 rm -f /tmp/pid_stat_url
-service nginx restart
 
+if [ -n "$(echo $serverip | grep [^0-9\.])" ] ; then #domain name detected so get https certificate
+  certbot -n --agree-tos --email email@email.com --nginx -d $serverip
+  httpport=443
+else
+  httpport=80
+fi
+#generate http auth
+hash=$(echo $password | openssl passwd -apr1 -stdin)
+echo "$user:$hash" >> /var/www/.htpasswd
+
+service nginx restart
 systemctl daemon-reload
 systemctl enable acestream_to_http.service
 systemctl stop acestream_to_http.service
@@ -67,10 +81,16 @@ systemctl start acestream_to_http.service
 #acestream engine 6878 http api control
 #acestream engine 8621 listening port
 ufw allow 22
-ufw allow 80
-ufw allow 443
+ufw allow $httpport
+ufw allow 4523
 ufw allow 8621
-ufw enable
+yes | ufw enable
 
 
 echo server running at http://$serverip:$port - login $webusername:$webpassword 
+echo -n listings at 
+if [ $httpport -eq "443" ]; then 
+  echo "https://$serverip"
+else 
+  echo "http://$serverip"
+fi
