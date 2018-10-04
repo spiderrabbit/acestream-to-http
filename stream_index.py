@@ -1,8 +1,8 @@
 import praw, re, sys, psutil, os
 import requests, hashlib, json, time, subprocess
 from MediaInfo import MediaInfo
-dir_path = os.path.dirname(os.path.realpath(__file__))
-with open(dir_path+'/public/streams/matches.json', 'r') as f: matches = json.loads(f.read())
+dir_path = 'www'+os.path.dirname(os.path.realpath(__file__))
+with open(dir_path+'/streams/matches.json', 'r') as f: matches = json.loads(f.read())
 
 reddit = praw.Reddit(client_id='eSLpkm36H4FelA',
                      client_secret='NM50GW0wQZ63Wju_n-8lgP4N0LE',
@@ -75,14 +75,14 @@ for match in matches:
           r = requests.get(response['response']['command_url']+"?method=stop")
         time.sleep(5)
 #print matches
-with open(dir_path+'/public/streams/matches.json', 'w') as f: f.write(json.dumps(newmatches))
+with open(dir_path+'/streams/matches.json', 'w') as f: f.write(json.dumps(newmatches))
 
 #write stream history
 for m in newmatches:
   for s in newmatches[m]:
-    if os.path.exists(dir_path+'/public/streams/%s' % s):
-      with open(dir_path+'/public/streams/%s' % s, 'r') as f: stream_history = json.loads(f.read())
+    if os.path.exists(dir_path+'/streams/%s' % s):
+      with open(dir_path+'/streams/%s' % s, 'r') as f: stream_history = json.loads(f.read())
       stream_history.append(newmatches[m][s])
     else:
       stream_history = [newmatches[m][s]]
-    with open(dir_path+'/public/streams/%s' % s, 'w') as f: f.write(json.dumps(stream_history))
+    with open(dir_path+'/streams/%s' % s, 'w') as f: f.write(json.dumps(stream_history))
