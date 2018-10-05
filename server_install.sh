@@ -19,7 +19,7 @@ if [ -x $(id -u acestream) ] ; then
   chown -R acestream:acestream /home/acestream
 fi
 
-serverip=$(grep "SERVER_IP = " /home/acestream/acestream-to-http-master/acestream_to_http.py | cut -d"=" -f2 | sed 's/[^0-9a-zA-Z\.]//g')
+serverip=$(grep "SERVER_IP = " /home/acestream/acestream-to-http/acestream_to_http.py | cut -d"=" -f2 | sed 's/[^0-9a-zA-Z\.]//g')
 if [ -z "$serverip" ]; then
   serverip=$(curl http://ipinfo.io/ip)
 fi
@@ -43,20 +43,23 @@ if [ -n "$webpassword_temp" ] ; then webpassword=$webpassword_temp ; fi
 add-apt-repository --yes ppa:certbot/certbot
 apt -y install python-certbot-nginx
 apt update
-apt install -y vlc ffmpeg python-pip curl nginx unzip php7.2-fpm ufw
+apt install -y vlc ffmpeg python-pip curl nginx unzip php7.2-fpm ufw openvpn
 pip install requests psutil mediainfo
 snap install acestreamplayer
 
+sudo -u acestream mkdir -p /home/acestream/acestream-to-http
 sudo -u acestream wget https://github.com/spiderrabbit/acestream-to-http/archive/master.zip -O /tmp/master.zip
-sudo -u acestream yes | unzip /tmp/master.zip -d /home/acestream/
+sudo -u acestream yes | unzip /tmp/master.zip -d /tmp/
+sudo -u acestream rsync -avp /tmp/acestream-to-http-master/ /home/acestream/acestream-to-http/
 
-sed -i "s/SERVER_IP = \"127.0.0.1\"/SERVER_IP = \"$serverip\"/g" /home/acestream/acestream-to-http-master/acestream_to_http.py
-sed -i "s/PORT = \"4523\"/PORT = \"$port\"/g" /home/acestream/acestream-to-http-master/acestream_to_http.py
-sed -i "s/USERNAME = \"user\"/USERNAME = \"$webusername\"/g" /home/acestream/acestream-to-http-master/acestream_to_http.py
-sed -i "s/PASSWORD = \"acestream\"/PASSWORD = \"$webpassword\"/g" /home/acestream/acestream-to-http-master/acestream_to_http.py
 
-cp /home/acestream/acestream-to-http-master/conf/acestream_to_http.service /lib/systemd/system/acestream_to_http.service
-cp /home/acestream/acestream-to-http-master/conf/nginx.conf /etc/nginx/sites-enabled/default
+sed -i "s/SERVER_IP = \"127.0.0.1\"/SERVER_IP = \"$serverip\"/g" /home/acestream/acestream-to-http/acestream_to_http.py
+sed -i "s/PORT = \"4523\"/PORT = \"$port\"/g" /home/acestream/acestream-to-http/acestream_to_http.py
+sed -i "s/USERNAME = \"user\"/USERNAME = \"$webusername\"/g" /home/acestream/acestream-to-http/acestream_to_http.py
+sed -i "s/PASSWORD = \"acestream\"/PASSWORD = \"$webpassword\"/g" /home/acestream/acestream-to-http/acestream_to_http.py
+
+cp /home/acestream/acestream-to-http/conf/acestream_to_http.service /lib/systemd/system/acestream_to_http.service
+cp /home/acestream/acestream-to-http/conf/nginx.conf /etc/nginx/sites-enabled/default
 sed -i "s/server_name _;/server_name $serverip _;/g" /etc/nginx/sites-available/default
 rm -f /tmp/pid_stat_url
 
@@ -75,14 +78,6 @@ systemctl daemon-reload
 systemctl enable acestream_to_http.service
 systemctl stop acestream_to_http.service
 systemctl start acestream_to_http.service
-
-# if setting up vpn then these commands allow ssh access
-#https://serverfault.com/questions/659955/allowing-ssh-on-a-server-with-an-active-openvpn-client
-# ip rule add from $(ip route get 1 | grep -Po '(?<=src )(\S+)') table 128
-# ip route add table 128 to $(ip route get 1 | grep -Po '(?<=src )(\S+)')/32 dev $(ip -4 route ls | grep default | grep -Po '(?<=dev )(\S+)')
-# ip route add table 128 default via $(ip -4 route ls | grep default | grep -Po '(?<=via )(\S+)')
-#route del default gw x.x.x.x
-#echo nameserver 8.8.8.8 > /etc/resolv.conf 
 
   
 #set up firewall
