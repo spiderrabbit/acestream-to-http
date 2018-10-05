@@ -6,7 +6,7 @@ PORT = "4523"
 SERVER_IP = "127.0.0.1"
 USERNAME = "user"
 PASSWORD = "acestream"
-dir_path = os.path.dirname(os.path.realpath(__file__))+"/www"  #change this to where you want to store files. Must have "listings" and "segements" subdirectories writeable by script
+dir_path = os.path.dirname(os.path.realpath(__file__))+"/www"  #change this to where you want to store files. Must have "listings" and "segments" subdirectories writeable by script
 
 temp_stream_saved = False
 file_save_status = []
@@ -86,7 +86,7 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             f = open(dir_path+"/listings/LIVE.strm", "w")
             f.write("http://%s/segments/acestream.m3u8" % (SERVER_IP))
             f.close()
-            subprocess.Popen(["cvlc", "--live-caching", "30000", pid_stat_url[2], "--sout", "#duplicate{dst=std{access=livehttp{seglen=5,delsegs=true,numsegs=20,index="+dir_path+"/segments/acestream.m3u8,index-url=http://"+SERVER_IP+"/segments/stream-########.ts},mux=ts{use-key-frames},dst="+dir_path+"/segments/stream-########.ts},dst=std{access=file,mux=ts,dst='/tmp/acestream.mkv'}}"])
+            subprocess.Popen(["cvlc", "--live-caching", "30000", pid_stat_url[2], "--sout", "#duplicate{dst=std{access=livehttp{seglen=5,delsegs=true,numsegs=20,index="+dir_path+"/segments/acestream.m3u8,index-url=http://"+SERVER_IP+"/segments/stream-########.ts},mux=ts{use-key-frames},dst="+dir_path+"/segments/stream-########.ts},dst=std{access=file,mux=ts,dst='"+dir_path+"/listings/live_stream_from_start.mp4'}}"])
         elif path[2] == 'stop' and len(pid_stat_url)>0:
           for process in psutil.process_iter(): #kill acestream engine and vlc
              if  process.name() == "acestreamengine" or ('/usr/bin/vlc' in process.cmdline() and '--live-caching' in process.cmdline()):
@@ -111,11 +111,11 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
       #ffmpeg has needed -bsf:a aac_adtstoasc option to fix  PES packet size mismatch, Error parsing ADTS frame header errors only for AAC audio
       try:
         if info.getInfo()['audioCodec']=="AAC":
-          file_save_status = ["ffmpeg", "-y", "-i", "/tmp/acestream.mkv", "-c:v", "copy", "-c:a", "copy", "-movflags", "faststart", "-bsf:a", "aac_adtstoasc", dir_path+"/listings/"+matchname+".mp4"]
+          file_save_status = ["ffmpeg", "-y", "-i", dir_path+"/listings/live_stream_from_start.mp4", "-c:v", "copy", "-c:a", "copy", "-movflags", "faststart", "-bsf:a", "aac_adtstoasc", dir_path+"/listings/"+matchname+".mp4"]
         else:
-          file_save_status = ["ffmpeg", "-y", "-i", "/tmp/acestream.mkv", "-c:v", "copy", "-c:a", "copy", "-movflags", "faststart", dir_path+"/listings/"+matchname+".mp4"]
+          file_save_status = ["ffmpeg", "-y", "-i", dir_path+"/listings/live_stream_from_start.mp4", "-c:v", "copy", "-c:a", "copy", "-movflags", "faststart", dir_path+"/listings/"+matchname+".mp4"]
       except:
-        file_save_status = ["ffmpeg", "-y", "-i", "/tmp/acestream.mkv", "-c:v", "copy", "-c:a", "copy", "-movflags", "faststart", dir_path+"/listings/"+matchname+".mp4"]
+        file_save_status = ["ffmpeg", "-y", "-i", dir_path+"/listings/live_stream_from_start.mp4", "-c:v", "copy", "-c:a", "copy", "-movflags", "faststart", dir_path+"/listings/"+matchname+".mp4"]
       subprocess.Popen(file_save_status)
       pid_stat_url = None
       with open('/tmp/pid_stat_url', 'w') as f: f.write(json.dumps(pid_stat_url))
