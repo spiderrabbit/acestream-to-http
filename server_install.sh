@@ -58,8 +58,8 @@ sudo -u acestream echo "[main]
 domain = $serverip
 port = $port
 username = $webusername
-password = $webpassword
-" > /home/acestream/.config/acestream-to-http/acestream_to_http.conf
+password = $webpassword" > /home/acestream/.config/acestream-to-http/acestream_to_http.conf
+chown acestream: /home/acestream/.config/acestream-to-http/acestream_to_http.conf
 
 
 cp /home/acestream/acestream-to-http/conf/acestream_to_http.service /lib/systemd/system/acestream_to_http.service
@@ -102,6 +102,8 @@ echo
 echo listings at 
 if [ $httpport -eq "443" ]; then 
   echo "https://$serverip"
+  echo "protocol = https" >> /home/acestream/.config/acestream-to-http/acestream_to_http.conf
 else 
   echo "http://$serverip"
+  echo "protocol = http" >> /home/acestream/.config/acestream-to-http/acestream_to_http.conf
 fi

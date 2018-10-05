@@ -9,6 +9,7 @@ PORT = Config.get('main', 'port')
 SERVER_IP = Config.get('main', 'domain')
 USERNAME = Config.get('main', 'username')
 PASSWORD = Config.get('main', 'password')
+PROTOCOL = Config.get('main', 'protocol')
 dir_path = os.path.dirname(os.path.realpath(__file__))+"/www"  #change this to where you want to store files. Must have "listings" and "segments" subdirectories writeable by script
 
 temp_stream_saved = False
@@ -87,9 +88,9 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
           if vlcrunning == False:#only start one instance
             temp_stream_saved = False
             f = open(dir_path+"/listings/LIVE.strm", "w")
-            f.write("http://%s/segments/acestream.m3u8" % (SERVER_IP))
+            f.write("%s://%s/segments/acestream.m3u8" % (PROTOCOL, SERVER_IP))
             f.close()
-            subprocess.Popen(["cvlc", "--live-caching", "30000", pid_stat_url[2], "--sout", "#duplicate{dst=std{access=livehttp{seglen=5,delsegs=true,numsegs=20,index="+dir_path+"/segments/acestream.m3u8,index-url=http://"+SERVER_IP+"/segments/stream-########.ts},mux=ts{use-key-frames},dst="+dir_path+"/segments/stream-########.ts},dst=std{access=file,mux=ts,dst='"+dir_path+"/listings/live_stream_from_start.mp4'}}"])
+            subprocess.Popen(["cvlc", "--live-caching", "30000", pid_stat_url[2], "--sout", "#duplicate{dst=std{access=livehttp{seglen=5,delsegs=true,numsegs=20,index="+dir_path+"/segments/acestream.m3u8,index-url="+PROTOCOL+"://"+SERVER_IP+"/segments/stream-########.ts},mux=ts{use-key-frames},dst="+dir_path+"/segments/stream-########.ts},dst=std{access=file,mux=ts,dst='"+dir_path+"/listings/live_stream_from_start.mp4'}}"])
         elif path[2] == 'stop' and len(pid_stat_url)>0:
           for process in psutil.process_iter(): #kill acestream engine and vlc
              if  process.name() == "acestreamengine" or ('/usr/bin/vlc' in process.cmdline() and '--live-caching' in process.cmdline()):
@@ -300,9 +301,9 @@ body{
         if vlcrunning:
           disabledtext[0] = "disabled style='opacity: 0.4;'"
           transcode_status_text = """
-          Transcoding<br />Stream: http://%s/segments/acestream.m3u8<br />
-          Kodi: http://%s/listings/LIVE.strm<br />
-          """ % (SERVER_IP, SERVER_IP)
+          Transcoding<br />Stream: %s://%s/segments/acestream.m3u8<br />
+          Kodi: %s://%s/listings/LIVE.strm<br />
+          """ % (PROTOCOL, SERVER_IP, PROTOCOL, SERVER_IP)
         else:
           disabledtext[1] = "disabled style='opacity: 0.4;'"
           transcode_status_text = "Not Transcoding"
@@ -327,7 +328,7 @@ body{
 
       if vlcrunning: disabledtext[0] = ""
       else: disabledtext[0] = "disabled style='opacity: 0.4;'"
-      self.wfile.write("<button class='button buttonloading' %s onclick='window.open(\"http://%s/player.html\", \"\", \"width=660,height=380\");'><i class='fa fa-play-circle'></i>Launch Player</button>" % (disabledtext[0], SERVER_IP))
+      self.wfile.write("<button class='button buttonloading' %s onclick='window.open(\""+PROTOCOL+"://%s/player.html\", \"\", \"width=660,height=380\");'><i class='fa fa-play-circle'></i>Launch Player</button>" % (disabledtext[0], SERVER_IP))
       
       if not temp_stream_saved:  disabledtext[0] = "disabled style='opacity: 0.4;'"
       else: disabledtext[0] = ""
@@ -347,7 +348,7 @@ def main():
   key = base64.b64encode("%s:%s" % (USERNAME, PASSWORD))
   SocketServer.TCPServer.allow_reuse_address = True
   httpd = SocketServer.TCPServer(("", int(PORT)), Handler)
-  print "Running on http://%s:%s" % (SERVER_IP, PORT)
+  print "Running on %s://%s:%s" % (PROTOCOL, SERVER_IP, PORT)
   httpd.serve_forever()
 
 main()
