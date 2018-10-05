@@ -2,10 +2,13 @@ import SimpleHTTPServer, SocketServer, requests, subprocess
 import os, psutil, time, sys, base64
 import hashlib, json
 from MediaInfo import MediaInfo
-PORT = "4523"
-SERVER_IP = "127.0.0.1"
-USERNAME = "user"
-PASSWORD = "acestream"
+import ConfigParser
+Config = ConfigParser.ConfigParser()
+Config.read("/home/acestream/.config/acestream-to-http/acestream_to_http.conf")
+PORT = Config.get('main', 'port')
+SERVER_IP = Config.get('main', 'domain')
+USERNAME = Config.get('main', 'username')
+PASSWORD = Config.get('main', 'password')
 dir_path = os.path.dirname(os.path.realpath(__file__))+"/www"  #change this to where you want to store files. Must have "listings" and "segments" subdirectories writeable by script
 
 temp_stream_saved = False

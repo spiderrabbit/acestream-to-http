@@ -19,7 +19,7 @@ if [ -x $(id -u acestream 2>/dev/null) ] ; then
   chown -R acestream:acestream /home/acestream
 fi
 
-serverip=$(grep "SERVER_IP = " /home/acestream/acestream-to-http/acestream_to_http.py  2>/dev/null | cut -d"=" -f2 | sed 's/[^0-9a-zA-Z\.]//g')
+serverip=$(grep "domain = " /home/acestream/.config/acestream-to-http/acestream_to_http.conf  2>/dev/null | cut -d"=" -f2 | sed 's/[^0-9a-zA-Z\.]//g')
 if [ -z "$serverip" ]; then
   serverip=$(curl http://ipinfo.io/ip)
 fi
@@ -48,15 +48,19 @@ pip install requests psutil mediainfo
 snap install acestreamplayer
 
 sudo -u acestream mkdir -p /home/acestream/acestream-to-http
-sudo -u acestream wget https://github.com/spiderrabbit/acestream-to-http/archive/master.zip -O /tmp/master.zip
+sudo -u acestream wget -q https://github.com/spiderrabbit/acestream-to-http/archive/master.zip -O /tmp/master.zip
 sudo -u acestream yes | unzip /tmp/master.zip -d /tmp/
 sudo -u acestream rsync -avP /tmp/acestream-to-http-master/ /home/acestream/acestream-to-http/
 
 
-sed -i "s/SERVER_IP = \".*\"/SERVER_IP = \"$serverip\"/g" /home/acestream/acestream-to-http/acestream_to_http.py
-sed -i "s/PORT = \"[0-9]*\"/PORT = \"$port\"/g" /home/acestream/acestream-to-http/acestream_to_http.py
-sed -i "s/USERNAME = \".*\"/USERNAME = \"$webusername\"/g" /home/acestream/acestream-to-http/acestream_to_http.py
-sed -i "s/PASSWORD = \".*\"/PASSWORD = \"$webpassword\"/g" /home/acestream/acestream-to-http/acestream_to_http.py
+sudo -u acestream mkdir -p /home/acestream/.config/acestream-to-http
+sudo -u acestream echo "[main]
+domain = $serverip
+port = $port
+username = $webusername
+password = $webpassword
+" > /home/acestream/.config/acestream-to-http/acestream_to_http.conf
+
 
 cp /home/acestream/acestream-to-http/conf/acestream_to_http.service /lib/systemd/system/acestream_to_http.service
 cp /home/acestream/acestream-to-http/conf/nginx.conf /etc/nginx/sites-enabled/default
