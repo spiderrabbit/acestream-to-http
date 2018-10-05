@@ -15,7 +15,8 @@ echo $username > /etc/openvpn/auth.txt
 echo $password >> /etc/openvpn/auth.txt
 
 chmod a+x /home/acestream/acestream-to-http/vpn/ip_rules_allow_ssh.sh
-rm /etc/rc.local
+/home/acestream/acestream-to-http/vpn/ip_rules_allow_ssh.sh
+rm -f /etc/rc.local
 printf '%s\n' '#!/bin/bash' '/home/acestream/acestream-to-http/vpn/ip_rules_allow_ssh.sh' 'exit 0' | sudo tee -a /etc/rc.local
 chmod +x /etc/rc.local
 
