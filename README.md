@@ -8,19 +8,29 @@ This script serves an acestream as a progressive (HLS) video download via a .m3u
 I've also written an install script that takes a fresh Ubuntu 18.04 install and does it all for you. Only takes 5:30 mins to spin up a fresh virtual server and have it serving Acestreams.
 
 
-INSTRUCTIONS TO SET UP PROXY ON A FRESH 18.04 SERVER
+## INSTRUCTIONS TO SET UP PROXY ON A FRESH 18.04 SERVER
 
 ssh in as root with Putty or your favorite client and run
 
-wget https://raw.githubusercontent.com/spiderrabbit/acestream-to-http/master/server_install.sh -O /tmp/server_install.sh; bash /tmp/server_install.sh 
+    wget https://raw.githubusercontent.com/spiderrabbit/acestream-to-http/master/server_install.sh -O /tmp/server_install.sh; bash /tmp/server_install.sh 
 
 The install script will ask for a password for username "acestream", your server IP/Port and webui user/password
 
 Done! - the script is available at http://SERVER:PORT/
 
+VPN
+
+## VPN Support
+
+This package comes with a prebuilt set of rules for Private Internet Access VPN. Simply (as root) go to the vpn subdirectory and run
+
+    install_vpn_service.sh
+    
+and enter your PIA username/ password. This will install ip tables routes and rules to allow ssh and HTTP access to the public ip of your server but will bind the acestream engine to a VPN which will run on restart as a service. (check with lsof -i). By default it chooses the UK London server; you can change this by altering vpn/privateinternetaccess.conf and entering a server closer to you: [PIA list of servers](https://www.privateinternetaccess.com/pages/network/)
 
 
-INSTRUCTIONS TO SET UP ON AN EXISTING LINUX SERVER (Advanced)
+
+## INSTRUCTIONS TO SET UP ON AN EXISTING LINUX SERVER (Advanced)
 
 You need a web server already installed to serve the video files - Nginx or Apache
 

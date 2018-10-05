@@ -20,5 +20,5 @@ printf '%s\n' '#!/bin/bash' '/home/acestream/acestream-to-http/vpn/ip_rules_allo
 chmod +x /etc/rc.local
 
 cp /home/acestream/acestream-to-http/vpn/privateinternetaccess* /etc/openvpn/
-systemctl enable openvpn@privateinternetaccessUKLondon
-systemctl start openvpn@privateinternetaccessUKLondon
+systemctl enable openvpn@privateinternetaccess
+systemctl start openvpn@privateinternetaccess
