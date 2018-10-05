@@ -2,7 +2,7 @@
 #copy/paste and run the line below as root user in the ssh client (without the initial hash/ pound!):
 #wget https://raw.githubusercontent.com/spiderrabbit/acestream-to-http/master/server_install.sh -O /tmp/server_install.sh; bash /tmp/server_install.sh
 
-if [ -x $(id -u acestream) ] ; then 
+if [ -x $(id -u acestream 2>/dev/null) ] ; then 
   echo -n "Enter system acestream user password: "
   read -s password
   echo
@@ -19,7 +19,7 @@ if [ -x $(id -u acestream) ] ; then
   chown -R acestream:acestream /home/acestream
 fi
 
-serverip=$(grep "SERVER_IP = " /home/acestream/acestream-to-http/acestream_to_http.py | cut -d"=" -f2 | sed 's/[^0-9a-zA-Z\.]//g')
+serverip=$(grep "SERVER_IP = " /home/acestream/acestream-to-http/acestream_to_http.py  2>/dev/null | cut -d"=" -f2 | sed 's/[^0-9a-zA-Z\.]//g')
 if [ -z "$serverip" ]; then
   serverip=$(curl http://ipinfo.io/ip)
 fi
@@ -50,13 +50,13 @@ snap install acestreamplayer
 sudo -u acestream mkdir -p /home/acestream/acestream-to-http
 sudo -u acestream wget https://github.com/spiderrabbit/acestream-to-http/archive/master.zip -O /tmp/master.zip
 sudo -u acestream yes | unzip /tmp/master.zip -d /tmp/
-sudo -u acestream rsync -avp /tmp/acestream-to-http/ /home/acestream/acestream-to-http/
+sudo -u acestream rsync -avP /tmp/acestream-to-http-master/ /home/acestream/acestream-to-http/
 
 
-sed -i "s/SERVER_IP = \"127.0.0.1\"/SERVER_IP = \"$serverip\"/g" /home/acestream/acestream-to-http/acestream_to_http.py
-sed -i "s/PORT = \"4523\"/PORT = \"$port\"/g" /home/acestream/acestream-to-http/acestream_to_http.py
-sed -i "s/USERNAME = \"user\"/USERNAME = \"$webusername\"/g" /home/acestream/acestream-to-http/acestream_to_http.py
-sed -i "s/PASSWORD = \"acestream\"/PASSWORD = \"$webpassword\"/g" /home/acestream/acestream-to-http/acestream_to_http.py
+sed -i "s/SERVER_IP = \".*\"/SERVER_IP = \"$serverip\"/g" /home/acestream/acestream-to-http/acestream_to_http.py
+sed -i "s/PORT = \"[0-9]*\"/PORT = \"$port\"/g" /home/acestream/acestream-to-http/acestream_to_http.py
+sed -i "s/USERNAME = \".*\"/USERNAME = \"$webusername\"/g" /home/acestream/acestream-to-http/acestream_to_http.py
+sed -i "s/PASSWORD = \".*\"/PASSWORD = \"$webpassword\"/g" /home/acestream/acestream-to-http/acestream_to_http.py
 
 cp /home/acestream/acestream-to-http/conf/acestream_to_http.service /lib/systemd/system/acestream_to_http.service
 cp /home/acestream/acestream-to-http/conf/nginx.conf /etc/nginx/sites-enabled/default
@@ -70,8 +70,8 @@ else
   httpport=80
 fi
 #generate http auth
-hash=$(echo $password | openssl passwd -apr1 -stdin)
-echo "$user:$hash" >> /var/www/.htpasswd
+hash=$(echo $webpassword | openssl passwd -apr1 -stdin)
+echo "$webusername:$hash" > /var/www/.htpasswd
 
 service nginx restart
 systemctl daemon-reload
