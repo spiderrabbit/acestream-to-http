@@ -7,8 +7,3 @@ current_gw=$(ip -4 route ls | grep default | grep -Po '(?<=via )(\S+)')
 ip rule add from $current_ip table 128
 ip route add table 128 to $current_ip/32 dev $(ip -4 route ls | grep default | grep -Po '(?<=dev )(\S+)')
 ip route add table 128 default via $current_gw
-
-#run commands below to make permanent
-#rm /etc/rc.local
-#printf '%s\n' '#!/bin/bash' '/home/acestream/acestream-to-http-master/vpn/ip_rules_allow_ssh.sh' 'exit 0' | sudo tee -a /etc/rc.local
-#sudo chmod +x /etc/rc.local
