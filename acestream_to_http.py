@@ -88,9 +88,9 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
           if vlcrunning == False:#only start one instance
             temp_stream_saved = False
             f = open(dir_path+"/listings/LIVE.strm", "w")
-            f.write("%s://%s/segments/acestream.m3u8" % (PROTOCOL, SERVER_IP))
+            f.write("%s://%s:%s@%s/segments/acestream.m3u8" % (PROTOCOL, USERNAME, PASSWORD, SERVER_IP))
             f.close()
-            subprocess.Popen(["cvlc", "--live-caching", "30000", pid_stat_url[2], "--sout", "#duplicate{dst=std{access=livehttp{seglen=5,delsegs=true,numsegs=20,index="+dir_path+"/segments/acestream.m3u8,index-url="+PROTOCOL+"://"+SERVER_IP+"/segments/stream-########.ts},mux=ts{use-key-frames},dst="+dir_path+"/segments/stream-########.ts},dst=std{access=file,mux=ts,dst='"+dir_path+"/listings/live_stream_from_start.mp4'}}"])
+            subprocess.Popen(["cvlc", "--live-caching", "30000", pid_stat_url[2], "--sout", "#duplicate{dst=std{access=livehttp{seglen=5,delsegs=true,numsegs=20,index="+dir_path+"/segments/acestream.m3u8,index-url="+PROTOCOL+":/"+USERNAME+":"+PASSWORD+"/@"+SERVER_IP+"/segments/stream-########.ts},mux=ts{use-key-frames},dst="+dir_path+"/segments/stream-########.ts},dst=std{access=file,mux=ts,dst='"+dir_path+"/listings/live_stream_from_start.mp4'}}"])
         elif path[2] == 'stop' and len(pid_stat_url)>0:
           for process in psutil.process_iter(): #kill acestream engine and vlc
              if  process.name() == "acestreamengine" or ('/usr/bin/vlc' in process.cmdline() and '--live-caching' in process.cmdline()):
