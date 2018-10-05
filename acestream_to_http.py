@@ -328,7 +328,7 @@ body{
 
       if vlcrunning: disabledtext[0] = ""
       else: disabledtext[0] = "disabled style='opacity: 0.4;'"
-      self.wfile.write("<button class='button buttonloading' %s onclick='window.open(\""+PROTOCOL+"://%s/player.html\", \"\", \"width=660,height=380\");'><i class='fa fa-play-circle'></i>Launch Player</button>" % (disabledtext[0], SERVER_IP))
+      self.wfile.write("<button class='button buttonloading' %s onclick='window.open(\"%s://%s/player.html\", \"\", \"width=660,height=380\");'><i class='fa fa-play-circle'></i>Launch Player</button>" % (disabledtext[0], PROTOCOL, SERVER_IP))
       
       if not temp_stream_saved:  disabledtext[0] = "disabled style='opacity: 0.4;'"
       else: disabledtext[0] = ""
