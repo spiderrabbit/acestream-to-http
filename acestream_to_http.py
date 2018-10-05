@@ -108,7 +108,7 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     elif path[1] == 'savefile' and len(path)==3:
       for f in path[2].split("?")[1].split("&"):
         if f.split("=")[0] == "savefilename":
-          savefilename = f.split("=")[1]
+          matchname = f.split("=")[1]
       for process in psutil.process_iter(): 
         if  process.name() == "acestreamengine" or ('/usr/bin/vlc' in process.cmdline() and '--live-caching' in process.cmdline()):
           process.kill()

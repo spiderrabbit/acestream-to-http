@@ -3,7 +3,7 @@ Proxy to serve Acestreams as HLS progressive download
 
 I (and the rest of the family) are firmly into Kodi, and I've been struggling to explain Acestreams to them - and my dad likes to watch soccer on the TV. He won't do VLC reflecting but he can just about understand Kodi links!
 
-This script serves an acestream as a progressive (HLS) video download via a .m3u8 and a Kodi .strm link. Multiple users can view the stream at the same time and it can run on reasonably low end hardware - I estimate approx 30 concurrent viewers on a HD stream on a 512MB single core at 2.2GHz. Bonus - you can opt to save the stream for later viewing.
+This script serves an acestream as a progressive (HLS) video download via a .m3u8 and a Kodi .strm link. Multiple users can view the stream at the same time and it can run on reasonably low end hardware - I estimate approx 30 concurrent viewers on a HD stream on a 512MB single core at 2.2GHz. Bonus - you can opt to save the stream for later viewing. The saved matches, webui and stream links are protected with HTTP AUTH and HTTPS (if you use a domain name rather than an IP e.g. noip or other dynamic DNS)
 
 I've also written an install script that takes a fresh Ubuntu 18.04 install and does it all for you. Only takes 5:30 mins to spin up a fresh virtual server and have it serving Acestreams.
 
