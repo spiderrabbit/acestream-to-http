@@ -50,7 +50,7 @@ snap install acestreamplayer
 sudo -u acestream mkdir -p /home/acestream/acestream-to-http
 sudo -u acestream wget https://github.com/spiderrabbit/acestream-to-http/archive/master.zip -O /tmp/master.zip
 sudo -u acestream yes | unzip /tmp/master.zip -d /tmp/
-sudo -u acestream rsync -avp /tmp/acestream-to-http-master/ /home/acestream/acestream-to-http/
+sudo -u acestream rsync -avp /tmp/acestream-to-http/ /home/acestream/acestream-to-http/
 
 
 sed -i "s/SERVER_IP = \"127.0.0.1\"/SERVER_IP = \"$serverip\"/g" /home/acestream/acestream-to-http/acestream_to_http.py
@@ -92,8 +92,10 @@ ufw allow 1194/udp
 yes | ufw enable
 
 
-echo server running at http://$serverip:$port - login $webusername:$webpassword 
-echo -n listings at 
+echo server running at :
+echo http://$serverip:$port - login $webusername:$webpassword 
+echo 
+echo listings at 
 if [ $httpport -eq "443" ]; then 
   echo "https://$serverip"
 else 

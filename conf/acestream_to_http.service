@@ -6,7 +6,7 @@ Conflicts=getty@tty1.service
 [Service]
 Type=simple
 User=acestream
-ExecStart=/usr/bin/python /home/acestream/acestream-to-http-master/acestream_to_http.py
+ExecStart=/usr/bin/python /home/acestream/acestream-to-http/acestream_to_http.py
 
 [Install]
 WantedBy=multi-user.target
