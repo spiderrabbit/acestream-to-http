@@ -348,7 +348,7 @@ def main():
   key = base64.b64encode("%s:%s" % (USERNAME, PASSWORD))
   SocketServer.TCPServer.allow_reuse_address = True
   httpd = SocketServer.TCPServer(("", int(PORT)), Handler)
-  print "Running on %s://%s:%s" % (PROTOCOL, SERVER_IP, PORT)
+  print "Running on http://%s:%s" % (SERVER_IP, PORT)
   httpd.serve_forever()
 
 main()
