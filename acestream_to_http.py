@@ -345,6 +345,7 @@ body{
 
 def main():
   global key, USERNAME, PASSWORD
+  with open('/tmp/pid_stat_url', 'w') as f: f.write(json.dumps(None))
   key = base64.b64encode("%s:%s" % (USERNAME, PASSWORD))
   SocketServer.TCPServer.allow_reuse_address = True
   httpd = SocketServer.TCPServer(("", int(PORT)), Handler)
