@@ -113,6 +113,7 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         if  process.name() == "acestreamengine" or ('/usr/bin/vlc' in process.cmdline() and '--live-caching' in process.cmdline()):
           process.kill()
       #ffmpeg has needed -bsf:a aac_adtstoasc option to fix  PES packet size mismatch, Error parsing ADTS frame header errors only for AAC audio
+      info = MediaInfo(filename = dir_path+"/listings/live_stream_from_start.mp4")
       try:
         if info.getInfo()['audioCodec']=="AAC":
           file_save_status = ["ffmpeg", "-y", "-i", dir_path+"/listings/live_stream_from_start.mp4", "-c:v", "copy", "-c:a", "copy", "-movflags", "faststart", "-bsf:a", "aac_adtstoasc", dir_path+"/listings/"+matchname+".mp4"]
