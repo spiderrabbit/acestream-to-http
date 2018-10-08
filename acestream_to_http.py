@@ -1,8 +1,10 @@
-import SimpleHTTPServer, SocketServer, requests, subprocess
+import SimpleHTTPServer, SocketServer, requests
 import os, psutil, time, sys, base64
 import hashlib, json
-from MediaInfo import MediaInfo
 import ConfigParser
+import acestream_to_http_tc
+
+
 Config = ConfigParser.ConfigParser()
 Config.read("/home/acestream/.config/acestream-to-http/acestream_to_http.conf")
 PORT = Config.get('main', 'port')
@@ -27,10 +29,8 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     self.end_headers()
   
   def do_GET(self):
-    global temp_stream_saved, file_save_status, key, streamtimer, dir_path
-    if not os.path.isfile('/tmp/pid_stat_url'):
-      with open('/tmp/pid_stat_url', 'w') as f: f.write(json.dumps(None))
-    with open('/tmp/pid_stat_url', 'r') as f: pid_stat_url = json.loads(f.read())
+    global temp_stream_saved, file_save_status, key, streamtimer, dir_pat
+    
     path = self.path.split("/")
     if path[1] != 'segments':#allow non-password access to live stream segments
       if self.headers.getheader('Authorization') == None:
@@ -55,50 +55,24 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     if path[1] == 'engine':
       if len(path) == 3:
         if path[2] == 'start' and enginerunning == False:
-          proc1 = subprocess.Popen(["/snap/bin/acestreamplayer.engine", "--client-console", "--live-cache-type", "disk", "--live-disk-cache-size", "1000000000"])
+          acestream_to_http_tc.startengine(dir_path)
         elif path[2] == 'stop':
-          for process in psutil.process_iter(): 
-            if process.name() == "acestreamengine" or ('/usr/bin/vlc' in process.cmdline() and '--live-caching' in process.cmdline()):
-              process.kill()
-          pid_stat_url = None
-          with open('/tmp/pid_stat_url', 'w') as f: f.write(json.dumps(pid_stat_url))
-          if os.path.isfile(dir_path+"/listings/LIVE.strm"):
-            os.remove(dir_path+"/listings/LIVE.strm")
+          acestream_to_http_tc.stopengine(dir_path)
         elif path[2] == 'stopstream':
-          for process in psutil.process_iter(): 
-            if'/usr/bin/vlc' in process.cmdline() and '--live-caching' in process.cmdline():
-              process.kill()
-          if pid_stat_url is not None:
-            #command_url ?method=stop
-            sr = requests.get(json.loads(pid_stat_url[3])['response']['command_url']+"?method=stop")
-            #print sr.text
-          pid_stat_url = None
-          with open('/tmp/pid_stat_url', 'w') as f: f.write(json.dumps(pid_stat_url))
-          if os.path.isfile(dir_path+"/listings/LIVE.strm"):
-            os.remove(dir_path+"/listings/LIVE.strm")
-
+          acestream_to_http_tc.stopenginestream(dir_path)
         time.sleep(5)
         self.send_response(302)
         self.send_header('Location',"/")
         self.end_headers()
     
-    elif path[1] == 'transcoding' and pid_stat_url is not None:
+    elif path[1] == 'transcoding' and acestream_to_http_tc.engine_status() is not None:
       if len(path) == 3:
-        if path[2] == 'start' and len(pid_stat_url)>0:
+        if path[2] == 'start':
           if vlcrunning == False:#only start one instance
             temp_stream_saved = False
-            f = open(dir_path+"/listings/LIVE.strm", "w")
-            f.write("%s://%s:%s@%s/segments/acestream.m3u8" % (PROTOCOL, USERNAME, PASSWORD, SERVER_IP))
-            f.close()
-            subprocess.Popen(["cvlc", "--live-caching", "30000", pid_stat_url[2], "--sout", "#duplicate{dst=std{access=livehttp{seglen=5,delsegs=true,numsegs=20,index="+dir_path+"/segments/acestream.m3u8,index-url="+PROTOCOL+"://"+USERNAME+":"+PASSWORD+"@"+SERVER_IP+"/segments/stream-########.ts},mux=ts{use-key-frames},dst="+dir_path+"/segments/stream-########.ts},dst=std{access=file,mux=ts,dst='"+dir_path+"/listings/live_stream_from_start.mp4'}}"])
-        elif path[2] == 'stop' and len(pid_stat_url)>0:
-          for process in psutil.process_iter(): #kill acestream engine and vlc
-             if  process.name() == "acestreamengine" or ('/usr/bin/vlc' in process.cmdline() and '--live-caching' in process.cmdline()):
-               process.kill()
-          pid_stat_url = None
-          with open('/tmp/pid_stat_url', 'w') as f: f.write(json.dumps(pid_stat_url))
-          if os.path.isfile(dir_path+"/listings/LIVE.strm"):
-            os.remove(dir_path+"/listings/LIVE.strm")
+            acestream_to_http_tc.startvlc(dir_path, PROTOCOL, USERNAME, PASSWORD, SERVER_IP)
+        elif path[2] == 'stop':
+          acestream_to_http_tc.stopengine(dir_path)
           temp_stream_saved = True
         time.sleep(5)
         self.send_response(302)
@@ -109,32 +83,15 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
       for f in path[2].split("?")[1].split("&"):
         if f.split("=")[0] == "savefilename":
           matchname = f.split("=")[1]
-      for process in psutil.process_iter(): 
-        if  process.name() == "acestreamengine" or ('/usr/bin/vlc' in process.cmdline() and '--live-caching' in process.cmdline()):
-          process.kill()
-      #ffmpeg has needed -bsf:a aac_adtstoasc option to fix  PES packet size mismatch, Error parsing ADTS frame header errors only for AAC audio
-      info = MediaInfo(filename = dir_path+"/listings/live_stream_from_start.mp4")
-      try:
-        if info.getInfo()['audioCodec']=="AAC":
-          file_save_status = ["ffmpeg", "-y", "-i", dir_path+"/listings/live_stream_from_start.mp4", "-c:v", "copy", "-c:a", "copy", "-movflags", "faststart", "-bsf:a", "aac_adtstoasc", dir_path+"/listings/"+matchname+".mp4"]
-        else:
-          file_save_status = ["ffmpeg", "-y", "-i", dir_path+"/listings/live_stream_from_start.mp4", "-c:v", "copy", "-c:a", "copy", "-movflags", "faststart", dir_path+"/listings/"+matchname+".mp4"]
-      except:
-        file_save_status = ["ffmpeg", "-y", "-i", dir_path+"/listings/live_stream_from_start.mp4", "-c:v", "copy", "-c:a", "copy", "-movflags", "faststart", dir_path+"/listings/"+matchname+".mp4"]
-      subprocess.Popen(file_save_status)
-      pid_stat_url = None
-      with open('/tmp/pid_stat_url', 'w') as f: f.write(json.dumps(pid_stat_url))
+      acestream_to_http_tc.stopengine(dir_path)
+      acestream_to_http_tc.ffmpeg_transcode(dir_path+"/listings/live_stream_from_start.mp4", dir_path+"/listings/"+matchname+".mp4")
       temp_stream_saved = False
       self.send_response(302)
       self.send_header('Location',"/")
       self.end_headers()
     
     elif path[1] == 'openpid' and len(path)==3 and enginerunning:
-      for process in psutil.process_iter(): #kill any vlc session
-        if  '/usr/bin/vlc' in process.cmdline() and '--live-caching' in process.cmdline():
-          process.kill()
-      pid_stat_url = None
-      with open('/tmp/pid_stat_url', 'w') as f: f.write(json.dumps(pid_stat_url))
+      acestream_to_http_tc.stopvlc(dir_path)
       stream_pid = False
       for f in path[2].split("?")[1].split("&"):
         if f.split("=")[0] == "pid":
@@ -142,8 +99,10 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
           stream_uid = hashlib.sha1(stream_pid).hexdigest()
       if stream_pid:
         r = requests.get('http://127.0.0.1:6878/ace/getstream?format=json&sid={0}&id={1}'.format(stream_uid, stream_pid))
-        pid_stat_url = [stream_pid, json.loads(r.text)['response']['stat_url'], json.loads(r.text)['response']['playback_url'], r.text, stream_pid]
-        with open('/tmp/pid_stat_url', 'w') as f: f.write(json.dumps(pid_stat_url))
+        out = json.loads(r.text)
+        out['response']['stream_pid'] = stream_pid
+        #pid_stat_url = [stream_pid, json.loads(r.text)['response']['stat_url'], json.loads(r.text)['response']['playback_url'], r.text, stream_pid]
+        with open('/tmp/pid_stat_url', 'w') as f: f.write(json.dumps(out))
       
       #start stream timer
       streamtimer = time.time()
@@ -231,12 +190,13 @@ body{
       
       disabledtext = ["", ""]
       stream_OK_to_transcode = False
+      engine_status = acestream_to_http_tc.engine_status()
       if enginerunning:
-        if pid_stat_url is not None:
-          s = requests.get(pid_stat_url[1])
+        if engine_status is not None:
+          s = requests.get(engine_status['response']['stat_url'])
           engine_response = json.loads(s.text)
           disabledtext[0] = "disabled style='opacity: 0.4;'"
-          acestream_status_text = "Streaming<br />acestream://%s<br />" % pid_stat_url[0]
+          acestream_status_text = "Streaming<br />acestream://%s<br />" % engine_status['response']['stream_pid']
           if (time.time() - streamtimer) < 30:
             acestream_status_text+="Wait 30s for stream to settle<br />"
             acestream_status_text+="""
@@ -346,11 +306,11 @@ body{
 
 def main():
   global key, USERNAME, PASSWORD
-  with open('/tmp/pid_stat_url', 'w') as f: f.write(json.dumps(None))
   key = base64.b64encode("%s:%s" % (USERNAME, PASSWORD))
   SocketServer.TCPServer.allow_reuse_address = True
   httpd = SocketServer.TCPServer(("", int(PORT)), Handler)
   print "Running on http://%s:%s" % (SERVER_IP, PORT)
+  acestream_to_http_tc.stopengine(dir_path)#start with a clean slate
   httpd.serve_forever()
 
 main()
