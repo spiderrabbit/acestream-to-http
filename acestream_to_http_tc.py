@@ -1,5 +1,5 @@
-import os, MediaInfo, json, subprocess, psutil, requests
-
+import os, json, subprocess, psutil, requests
+from MediaInfo import MediaInfo
 def startvlc(dir_path, PROTOCOL, USERNAME, PASSWORD, SERVER_IP):
   f = open(dir_path+"/listings/LIVE.strm", "w")
   f.write("%s://%s:%s@%s/segments/acestream.m3u8" % (PROTOCOL, USERNAME, PASSWORD, SERVER_IP))
