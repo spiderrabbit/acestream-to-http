@@ -1,9 +1,24 @@
 <?php
+$store = '../torecord.json';
 if($_GET['action']=='record'){
-    $torecord = json_decode(file_get_contents('../torecord.json'),1);
-    if (!in_array($_GET['name'],$torecord)){
-      $torecord[] = $_GET['name'];
-      file_put_contents('../torecord.json', json_encode($torecord));
+  $torecord = json_decode(file_get_contents($store),1);
+  if (!in_array($_GET['name'],$torecord)){
+    $torecord[] = $_GET['name'];
+    file_put_contents($store, json_encode($torecord));
+  }
+  echo "OK";
+}
+else if($_GET['action']=='torecord'){
+  $torecord = json_decode(file_get_contents($store),1);
+  for ($i=0; $i<count($torecord);$i++){
+    $timestr = preg_replace("#[^0-9:-]#","",substr($torecord[$i],-16));
+    if (strlen($timestr)==15){
+      $matchtime=strtotime($timestr."Z");
+      if ($matchtime and (time() - $matchtime) < 7200){#remove listings more than 2 hours old
+        $newtorecord[] = $torecord[$i];
+      }
     }
-    echo "OK";
+  }
+  file_put_contents($store, json_encode($newtorecord));
+  echo json_encode($newtorecord);
 }
