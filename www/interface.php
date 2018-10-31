@@ -22,3 +22,16 @@ else if($_GET['action']=='torecord'){
   file_put_contents($store, json_encode($newtorecord));
   echo json_encode($newtorecord);
 }
+else if($_GET['action']=='playstream'){
+  $stream_id = preg_replace("#[^0-9a-z]#","",$_GET[stream_id]);
+  if (strlen($stream_id)==40){
+    $command = '/usr/bin/python /home/acestream/acestream-to-http/playstream.py '.$stream_id;
+    exec($command. " > /dev/null &");
+  }
+  else echo "ERROR";
+}
+else if($_GET['action']=='stopstream'){
+  echo "k";
+  $command = '/usr/bin/python /home/acestream/acestream-to-http/playstream.py stopstream';
+  exec($command. " > /dev/null &");
+}

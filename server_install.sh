@@ -65,6 +65,9 @@ chmod 666 /home/acestream/acestream-to-http/torecord.json
 cp /home/acestream/acestream-to-http/conf/acestream_to_http.service /lib/systemd/system/acestream_to_http.service
 cp /home/acestream/acestream-to-http/conf/nginx.conf /etc/nginx/sites-enabled/default
 sed -i "s/server_name _;/server_name $serverip _;/g" /etc/nginx/sites-available/default
+sed -i "s/user www-data/user acestream/g" /etc/nginx/nginx.conf
+sed -i "s/www-data/acestream/g" /etc/php/7.2/fpm/pool.d/www.conf
+service php7.2-fpm restart
 rm -f /tmp/pid_stat_url
 
 if [ -n "$(echo $serverip | grep [^0-9\.])" ] ; then #domain name detected so get https certificate
