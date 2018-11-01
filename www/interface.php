@@ -25,7 +25,7 @@ else if($_GET['action']=='torecord'){
 else if($_GET['action']=='playstream'){
   $stream_id = preg_replace("#[^0-9a-z]#","",$_GET[stream_id]);
   if (strlen($stream_id)==40){
-    $command = '/usr/bin/python /home/acestream/acestream-to-http/playstream.py '.$stream_id;
+    $command = '/usr/bin/python /home/acestream/acestream-to-http/playstream.py '.$stream_id.' live_stream_from_start';
     exec($command. " > /dev/null &");
   }
   else echo "ERROR";

@@ -1,12 +1,12 @@
 import os, json, subprocess, psutil, requests
 from MediaInfo import MediaInfo
-def startvlc(dir_path, PROTOCOL, USERNAME, PASSWORD, SERVER_IP):
+def startvlc(dir_path, PROTOCOL, USERNAME, PASSWORD, SERVER_IP, recording_name):
   pid_stat_url=engine_status()
   
   f = open(dir_path+"/listings/LIVE.strm", "w")
   f.write("%s://%s:%s@%s/segments/acestream.m3u8" % (PROTOCOL, USERNAME, PASSWORD, SERVER_IP))
   f.close()
-  subprocess.Popen(["cvlc", "--live-caching", "30000", pid_stat_url['response']['playback_url'], "--sout", "#duplicate{dst=std{access=livehttp{seglen=5,delsegs=true,numsegs=20,index="+dir_path+"/segments/acestream.m3u8,index-url="+PROTOCOL+"://"+USERNAME+":"+PASSWORD+"@"+SERVER_IP+"/segments/stream-########.ts},mux=ts{use-key-frames},dst="+dir_path+"/segments/stream-########.ts},dst=std{access=file,mux=ts,dst='"+dir_path+"/listings/live_stream_from_start.mp4'}}"])
+  subprocess.Popen(["cvlc", "--live-caching", "30000", pid_stat_url['response']['playback_url'], "--sout", "#duplicate{dst=std{access=livehttp{seglen=5,delsegs=true,numsegs=20,index="+dir_path+"/segments/acestream.m3u8,index-url="+PROTOCOL+"://"+USERNAME+":"+PASSWORD+"@"+SERVER_IP+"/segments/stream-########.ts},mux=ts{use-key-frames},dst="+dir_path+"/segments/stream-########.ts},dst=std{access=file,mux=ts,dst='"+dir_path+"/listings/"+recording_name+".mp4'}}"])
   return
 
 def stopvlc(dir_path):
