@@ -89,7 +89,7 @@ while True:
           playstream.playstream(preferred_stream, '{0}_{1}'.format(m, recording_part))
           started_recording = True
         else:
-          print "not found"
+          print "not found"# NEED TO ADD ALTERNATIVE QUERIES TO IMPROVE SEARCH
   else:#is recording started_recording == True:
     if time.time() - unix_start > (3*3600):#recording for 3 hours - stop
       acestream_to_http_tc.stopengine(dir_path)
