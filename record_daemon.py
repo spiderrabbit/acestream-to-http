@@ -31,6 +31,18 @@ def getlinks(url):
   reply = result.read()
   return json.loads(reply)
 
+def findmatch(searchquery):
+  #search r/soccerstreams for streams
+  request = urllib2.Request('https://www.reddit.com/r/soccerstreams/search.json?sort=new&restrict_sr=on&limit=1&q={0}'.format(query))
+  request.add_header('User-agent', 'Kodi soccerstreams bot 0.1')
+  data = {'data':{'children':''}}#initialise data variable
+  try:
+    result = urllib2.urlopen(request)
+    data = json.loads(result.read())
+  except:#error in fetch (e.g. 503 unavailable), back to top of while loop
+    pass
+  return data
+
 def findstream(matchlink):
   global links, blacklisted_streams
   data = getlinks(matchlink)
@@ -73,23 +85,19 @@ while True:
         teams = re.sub(r"[A-Z]{2,10}",'',m[:-16])#remove all capital words e.g. AFC
         teams = teams.split("vs")
         query = "{}%20AND%20{}".format(teams[0].strip().split(" ")[0], teams[1].strip().split(" ")[0])
-        #search r/soccerstreams for streams
-        request = urllib2.Request('https://www.reddit.com/r/soccerstreams/search.json?sort=new&restrict_sr=on&q={0}'.format(query))
-        request.add_header('User-agent', 'Kodi soccerstreams bot 0.1')
-        data = {'data':{'children':''}}#initialise data variable
-        try:
-          result = urllib2.urlopen(request)
-          data = json.loads(result.read())
-        except:#error in fetch (e.g. 503 unavailable), back to top of while loop
-          continue
+        data = findmatch(query) #find via both teams
+        if len(data['data']['children'])==0:#nothing found
+          query = "{}%20OR%20{}".format(teams[0].strip().split(" ")[0], teams[1].strip().split(" ")[0])
+          data = findmatch(query)# find via either team
         if len(data['data']['children'])>0:#found a match
+          print "found via {}".format(query)
           matchlink = data['data']['children'][0]['data']['url']
           preferred_stream = findstream(matchlink)
           print preferred_stream
           playstream.playstream(preferred_stream, '{0}_{1}'.format(m, recording_part))
           started_recording = True
         else:
-          print "not found"# NEED TO ADD ALTERNATIVE QUERIES TO IMPROVE SEARCH
+          print "{} not found".format(m)# NEED TO ADD ALTERNATIVE QUERIES TO IMPROVE SEARCH
   else:#is recording started_recording == True:
     if time.time() - unix_start > (3*3600):#recording for 3 hours - stop
       acestream_to_http_tc.stopengine(dir_path)
