@@ -72,7 +72,7 @@ started_recording = False
 links = []
 recording_part = 1
 while True:
-  print "loop"  #crawl every 1 minute to see if needs to start recording- start 5 mins beforehand
+  #print "loop"  #crawl every 1 minute to see if needs to start recording- start 5 mins beforehand
   if started_recording == False:
     with open(dir_path+'/torecord.json') as f: #load matches to record
       torecord = json.load(f)
@@ -101,6 +101,8 @@ while True:
   else:#is recording started_recording == True:
     if time.time() - unix_start > (3*3600):#recording for 3 hours - stop
       acestream_to_http_tc.stopengine(dir_path)
+      #process file
+      acestream_to_http_tc.ffmpeg_transcode('{0}/www/listings/{1}_{2}.mp4',format(dir_path, m, recording_part), '{0}/www/listings/PROCESSED_{1}_{2}.mp4',format(dir_path, m, recording_part))
       started_recording = False
       blacklisted_streams = []
       recording_part = 1
@@ -123,9 +125,12 @@ while True:
           except urllib2.URLError:
             engine_failure = True
       if restart_recording:
-        if engine_failure == False:
-          blacklisted_streams.append(preferred_stream)#only blacklist non working streams
+        if engine_failure == False:#only blacklist non working streams, not if engine failed
+          blacklisted_streams.append(preferred_stream)
         print "restart"
+        #transcode stream that has stopped
+        acestream_to_http_tc.ffmpeg_transcode('{0}/www/listings/{1}_{2}.mp4',format(dir_path, m, recording_part), '{0}/www/listings/PROCESSED_{1}_{2}.mp4',format(dir_path, m, recording_part))
+        #find another stream
         preferred_stream = findstream(matchlink)
         recording_part += 1 
         playstream.playstream(preferred_stream, '{0}_{1}'.format(m, recording_part))
