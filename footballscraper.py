@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-import requests
+import requests, json
 from datetime import datetime
 from datetime import timedelta
 thisyear = datetime.today().strftime("%Y")
@@ -15,7 +15,8 @@ for a in leagues.findAll('a'):
   data = r.text
   soup = BeautifulSoup(data, features="html.parser") 
   competition = soup.find('h1', {'class':'competition-title'})
-  match_dict[competition.encode_contents().encode('utf-8')] = {}
+  competition = competition.encode_contents().encode('utf-8')
+  match_dict[competition] = {}
   matches = soup.findAll('dl', {'class':'matches'})
   for m in matches:
     day = m.find_previous_sibling('h3')
@@ -26,11 +27,10 @@ for a in leagues.findAll('a'):
       matchdateobj = datetime.strptime('{0} {1}'.format(matchdate, thisyear),'%A %d %B %Y')
     if matchdateobj < datetime.today() : 
       matchdateobj =  matchdateobj.replace(year= int(thisyear)+1)
-    match_dict[competition.encode_contents()][matchdateobj.strftime('%Y-%m-%d')] = []
+    if matchdateobj.strftime('%Y-%m-%d') not in match_dict[competition]:
+      match_dict[competition][matchdateobj.strftime('%Y-%m-%d')] = []
     home = m.find('span', {'class':'home-side'}).find('img')['alt'].encode('utf-8')
     away = m.find('span', {'class':'away-side'}).find('img')['alt'].encode('utf-8')
     time = m.find('span', {'class': 'match-time'})
-    match_dict[competition.encode_contents()][matchdateobj.strftime('%Y-%m-%d')].append('{0} vs {1} {2} {3}'.format(home, away, matchdateobj.strftime('%Y-%m-%d'), time.encode_contents()))
-print match_dict
-  
-
+    match_dict[competition][matchdateobj.strftime('%Y-%m-%d')].append('{0} vs {1} {2} {3}'.format(home, away, matchdateobj.strftime('%Y-%m-%d'), time.encode_contents()))
+print json.dumps(match_dict)
