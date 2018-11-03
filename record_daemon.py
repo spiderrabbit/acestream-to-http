@@ -11,7 +11,8 @@ def getreplies(data):
   except:
     pass
   try:
-    acestreams = re.findall(r'[\[\]\w\s]*acestream://[\w]{40}[\[\]\w\s]*', data['body'])
+    acestreams = re.findall(r'[^\n]*acestream://[\w]{40}[^\n]*', data['body'])
+    #acestreams = re.findall(r'[\[\]\w\s]*acestream://[\w]{40}[\[\]\w\s]*', data['body'])
     #acestreams = re.findall(r'acestream://([0-9a-z]+)', data['body'])
     for a in acestreams:
       links.append({'acestream':a, 'verified':verified})
@@ -102,7 +103,7 @@ while True:
     if time.time() - unix_start > (3*3600):#recording for 3 hours - stop
       acestream_to_http_tc.stopengine(dir_path)
       #process file
-      acestream_to_http_tc.ffmpeg_transcode('{0}/www/listings/{1}_{2}.mp4',format(dir_path, m, recording_part), '{0}/www/listings/PROCESSED_{1}_{2}.mp4',format(dir_path, m, recording_part))
+      #acestream_to_http_tc.ffmpeg_transcode('{0}/www/listings/{1}_{2}.mp4'.format(dir_path, m, recording_part), '{0}/www/listings/PROCESSED_{1}_{2}.mp4'.format(dir_path, m, recording_part))
       started_recording = False
       blacklisted_streams = []
       recording_part = 1
@@ -129,7 +130,7 @@ while True:
           blacklisted_streams.append(preferred_stream)
         print "restart"
         #transcode stream that has stopped
-        acestream_to_http_tc.ffmpeg_transcode('{0}/www/listings/{1}_{2}.mp4',format(dir_path, m, recording_part), '{0}/www/listings/PROCESSED_{1}_{2}.mp4',format(dir_path, m, recording_part))
+        #acestream_to_http_tc.ffmpeg_transcode('{0}/www/listings/{1}_{2}.mp4'.format(dir_path, m, recording_part), '{0}/www/listings/PROCESSED_{1}_{2}.mp4'.format(dir_path, m, recording_part))
         #find another stream
         preferred_stream = findstream(matchlink)
         recording_part += 1 
