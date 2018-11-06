@@ -19,7 +19,6 @@ def playstream(stream_pid, recording_name):
   enginerunning = False
   if "acestreamengine" in (p.name() for p in psutil.process_iter()): 
     enginerunning=True
-
   if enginerunning == False:
     acestream_to_http_tc.startengine(dir_path)
     time.sleep(5)
@@ -44,11 +43,13 @@ def playstream(stream_pid, recording_name):
 def main():
   if stream_pid == 'stopstream':
     acestream_to_http_tc.stopengine(dir_path)
-    
-  elif stream_pid:
+  elif len(stream_pid) == 40:
     allow_recording = True
     if recording_name == 'live_stream_from_start':#is a live stream rather than recording- do not allow to override
       if acestream_to_http_tc.engine_status() is not None: 
         allow_recording = False
     if allow_recording: 
       playstream(stream_pid, recording_name)
+
+if __name__ == "__main__":
+    main()
