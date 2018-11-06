@@ -25,7 +25,7 @@ for a in leagues.findAll('a'):
       matchdateobj = datetime.today()
     else:
       matchdateobj = datetime.strptime('{0} {1}'.format(matchdate, thisyear),'%A %d %B %Y')
-    if matchdateobj < datetime.today() : 
+    if matchdateobj < datetime.today().replace(hour=0, minute=0,second=0,microsecond=0) : 
       matchdateobj =  matchdateobj.replace(year= int(thisyear)+1)
     if matchdateobj.strftime('%Y-%m-%d') not in match_dict[competition]:
       match_dict[competition][matchdateobj.strftime('%Y-%m-%d')] = []

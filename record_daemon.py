@@ -26,7 +26,7 @@ def getreplies(data):
     pass
 
 def getlinks(url):
-  request = urllib2.Request(url+'search.json')
+  request = urllib2.Request(url+'search.json?sort=top')
   request.add_header('User-agent', 'Kodi soccerstreams bot 0.1')
   result = urllib2.urlopen(request)
   reply = result.read()
@@ -72,38 +72,45 @@ blacklisted_streams = []
 started_recording = False
 links = []
 recording_part = 1
+with open('/tmp/current_recording', 'w+') as f: f.write('')
 while True:
   #print "loop"  #crawl every 1 minute to see if needs to start recording- start 5 mins beforehand
   if started_recording == False:
     with open(dir_path+'/torecord.json') as f: #load matches to record
       torecord = json.load(f)
-    for m in torecord: #iterate through each scheduled recording
-      mtime = datetime.datetime.strptime(m[-16:], '%Y-%m-%d %H:%M')
-      unix_start = time.mktime(mtime.timetuple())#get start time of matches
-      # if it is now more than 5 mins before start time and not more than 3 hours ago
-      if ((unix_start - 300) < time.time()) and (time.time() - unix_start < (3*3600)):
-        #parse team string data
-        teams = re.sub(r"[A-Z]{2,10}",'',m[:-16])#remove all capital words e.g. AFC
-        teams = teams.split("vs")
-        query = "{}%20AND%20{}".format(teams[0].strip().split(" ")[0], teams[1].strip().split(" ")[0])
-        data = findmatch(query) #find via both teams
-        if len(data['data']['children'])==0:#nothing found
-          query = "{}%20OR%20{}".format(teams[0].strip().split(" ")[0], teams[1].strip().split(" ")[0])
-          data = findmatch(query)# find via either team
-        if len(data['data']['children'])>0:#found a match
-          print "found via {}".format(query)
-          matchlink = data['data']['children'][0]['data']['url']
-          preferred_stream = findstream(matchlink)
-          print preferred_stream
-          playstream.playstream(preferred_stream, '{0}_{1}'.format(m, recording_part))
-          started_recording = True
-        else:
-          print "{} not found".format(m)# NEED TO ADD ALTERNATIVE QUERIES TO IMPROVE SEARCH
+    if torecord is not None:
+      for m in torecord: #iterate through each scheduled recording
+        mtime = datetime.datetime.strptime(m[-16:], '%Y-%m-%d %H:%M')
+        unix_start = time.mktime(mtime.timetuple())#get start time of matches
+        # if it is now more than 5 mins before start time and not more than 3 hours ago
+        if ((unix_start - 300) < time.time()) and (time.time() - unix_start < (3*3600)):
+          #parse team string data
+          teams = re.sub(r"[A-Z]{2,10}",'',m[:-16])#remove all capital words e.g. AFC
+          teams = teams.split("vs")
+          hometeam = teams[0].strip().split(" ")[0]
+          awayteam = teams[1].strip().split(" ")[0]
+          if len(awayteam) == 0: query = hometeam
+          elif len(hometeam) == 0: query = awayteam
+          else: query = "{}%20AND%20{}".format(hometeam, awayteam)
+          data = findmatch(query) #find via both teams
+          if len(data['data']['children'])==0:#nothing found
+            query = "{}%20OR%20{}".format(hometeam, awayteam)
+            data = findmatch(query)# find via either team
+          if len(data['data']['children'])>0:#found a match
+            print "found via {}".format(query)
+            matchlink = data['data']['children'][0]['data']['url']
+            preferred_stream = findstream(matchlink)
+            print preferred_stream
+            playstream.playstream(preferred_stream, '{0}_{1}'.format(m, recording_part))
+            started_recording = True
+            break
+          else:
+            print "{0} not found via {1}".format(m, query)# NEED TO ADD ALTERNATIVE QUERIES TO IMPROVE SEARCH
   else:#is recording started_recording == True:
     if time.time() - unix_start > (3*3600):#recording for 3 hours - stop
       acestream_to_http_tc.stopengine(dir_path)
       #process file
-      #acestream_to_http_tc.ffmpeg_transcode('{0}/www/listings/{1}_{2}.mp4'.format(dir_path, m, recording_part), '{0}/www/listings/PROCESSED_{1}_{2}.mp4'.format(dir_path, m, recording_part))
+      acestream_to_http_tc.ffmpeg_transcode('{0}/www/listings/{1}_{2}.mp4'.format(dir_path, m, recording_part), '{0}/www/listings/PROCESSED_{1}_{2}.mp4'.format(dir_path, m, recording_part))
       started_recording = False
       blacklisted_streams = []
       recording_part = 1
@@ -130,7 +137,7 @@ while True:
           blacklisted_streams.append(preferred_stream)
         print "restart"
         #transcode stream that has stopped
-        #acestream_to_http_tc.ffmpeg_transcode('{0}/www/listings/{1}_{2}.mp4'.format(dir_path, m, recording_part), '{0}/www/listings/PROCESSED_{1}_{2}.mp4'.format(dir_path, m, recording_part))
+        acestream_to_http_tc.ffmpeg_transcode('{0}/www/listings/{1}_{2}.mp4'.format(dir_path, m, recording_part), '{0}/www/listings/PROCESSED_{1}_{2}.mp4'.format(dir_path, m, recording_part))
         #find another stream
         preferred_stream = findstream(matchlink)
         recording_part += 1 
@@ -138,22 +145,4 @@ while True:
       else:
         print "OK to carry on"
   time.sleep(60)
-  
-  
 
-
-
-#(function)
-
-#check if engine running, if not running then start
-
-#start stream and write pid file
-
-#(function)check qualaity of stream- if buffering or <200kbps 
-#then increment part number and find another stream
-
-#start transcoding - MATCH NAME-PART NUMBER.mp4 and live stream
-#every minute check quality of stream
-
-#5+45+15+45+30 - minumum 140minues
-#after 3 hours stop recording

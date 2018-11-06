@@ -10,12 +10,14 @@ def startvlc(dir_path, PROTOCOL, USERNAME, PASSWORD, SERVER_IP, recording_name):
     "--sout", 
     "#duplicate{{dst=std{{access=livehttp{{seglen=5,delsegs=true,numsegs=20,index={0}/listings/LIVE.m3u8,index-url={1}://{2}/segments/{3}-########.ts}},mux=ts{{use-key-frames}},dst={0}/segments/{3}-########.ts}},dst=std{{access=file,mux=ts,dst='{0}/listings/{4}.mp4'}}}}".format(dir_path, PROTOCOL, SERVER_IP, random_segment_name, recording_name)
   ])
+  with open('/tmp/current_recording', 'w') as f: f.write(recording_name)
   return
 
 def stopvlc(dir_path):
   for process in psutil.process_iter(): 
     if'/usr/bin/vlc' in process.cmdline() and '--live-caching' in process.cmdline():
       process.kill()
+  with open('/tmp/current_recording', 'w') as f: f.write('')
 
 def startengine(dir_path):
   subprocess.Popen(["/snap/bin/acestreamplayer.engine", "--client-console", "--live-cache-type", "disk", "--live-disk-cache-size", "1000000000"])

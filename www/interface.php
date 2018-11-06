@@ -22,6 +22,14 @@ else if($_GET['action']=='torecord'){
   file_put_contents($store, json_encode($newtorecord));
   echo json_encode($newtorecord);
 }
+else if($_GET['action']=='deleterecording'){
+  $torecord = json_decode(file_get_contents($store),1);
+  for ($i=0; $i<count($torecord);$i++){
+    if ($_GET['name'] != $torecord[$i]) $newtorecord[] = $torecord[$i];
+  }
+  file_put_contents($store, json_encode($newtorecord));
+  echo json_encode($newtorecord);
+}
 else if($_GET['action']=='playstream'){
   $stream_id = preg_replace("#[^0-9a-z]#","",$_GET['stream_id']);
   if (strlen($stream_id)==40){
@@ -31,7 +39,15 @@ else if($_GET['action']=='playstream'){
   else echo "ERROR";
 }
 else if($_GET['action']=='stopstream'){
-  echo "k";
   $command = '/usr/bin/python /home/acestream/acestream-to-http/playstream.py stopstream';
   exec($command. " > /dev/null &");
+}
+
+else if($_GET['action']=='status'){
+  $status = [];
+  $current_recording = file_get_contents('/tmp/current_recording');
+  if (strlen($current_recording)>0){
+    $status = ['current_recording'=>$current_recording];
+  }
+  echo json_encode($status);
 }
