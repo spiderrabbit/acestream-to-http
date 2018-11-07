@@ -51,3 +51,24 @@ else if($_GET['action']=='status'){
   }
   echo json_encode($status);
 }
+else if($_GET['action']=='listings'){
+  echo file_get_contents('listings/recordings.json');
+}
+// else if($_GET['action']=='listings'){
+//   $recordings = json_decode(file_get_contents('listings/recordings.json'),1);
+//   print_r($recordings);
+//   $dirlist = scandir('listings');
+//   for ($i=0; $i< count($dirlist); $i++){
+//     if (substr($dirlist[$i],-3)=="mp4"){
+//       $outdirlist[$dirlist[$i]]=True;
+//       }
+//     }
+//   print_r($outdirlist);
+//   unset($outdirlist['live_stream_from_start.mp4']);
+//   foreach ($outdirlist as $k=>$v){
+//     if (substr($k,0,10)=="PROCESSED_"){
+//       unset($outdirlist[substr($k,10)]);
+//     }
+//   }
+//   print_r($outdirlist);
+// }

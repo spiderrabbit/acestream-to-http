@@ -20,10 +20,10 @@ def playstream(stream_pid, recording_name):
   if "acestreamengine" in (p.name() for p in psutil.process_iter()): 
     enginerunning=True
   if enginerunning == False:
-    acestream_to_http_tc.startengine(dir_path)
+    acestream_to_http_tc.startengine()
     time.sleep(5)
     
-  acestream_to_http_tc.stopvlc(dir_path)#stop any existing transcoding
+  acestream_to_http_tc.stopvlc()#stop any existing transcoding
   stream_uid = hashlib.sha1(stream_pid).hexdigest()
   r = requests.get('http://127.0.0.1:6878/ace/getstream?format=json&sid={0}&id={1}'.format(stream_uid, stream_pid))
   out = json.loads(r.text)
@@ -34,15 +34,15 @@ def playstream(stream_pid, recording_name):
 
     time.sleep(5)
 
-    acestream_to_http_tc.startvlc(dir_path, PROTOCOL, USERNAME, PASSWORD, SERVER_IP, recording_name)
+    acestream_to_http_tc.startvlc(recording_name)
 
-    print '{0}://{1}:{2}@{3}/segments/acestream.m3u8'.format(PROTOCOL, USERNAME, PASSWORD, SERVER_IP)
-  else:
-    print out['error']
+    #print '{0}://{1}:{2}@{3}/segments/acestream.m3u8'.format(PROTOCOL, USERNAME, PASSWORD, SERVER_IP)
+  #else:
+    #print out['error']
 
 def main():
   if stream_pid == 'stopstream':
-    acestream_to_http_tc.stopengine(dir_path)
+    acestream_to_http_tc.stopengine()
   elif len(stream_pid) == 40:
     allow_recording = True
     if recording_name == 'live_stream_from_start':#is a live stream rather than recording- do not allow to override

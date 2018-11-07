@@ -3,7 +3,7 @@ import os, psutil, time, sys, base64
 import hashlib, json
 import ConfigParser
 import acestream_to_http_tc
-
+from datetime import datetime
 
 Config = ConfigParser.ConfigParser()
 Config.read("/home/acestream/.config/acestream-to-http/acestream_to_http.conf")
@@ -18,7 +18,7 @@ temp_stream_saved = False
 file_save_status = []
 key = ""
 streamtimer = 0
-
+saved_file_name = ""
 Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
 
 class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
@@ -29,7 +29,7 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     self.end_headers()
   
   def do_GET(self):
-    global temp_stream_saved, file_save_status, key, streamtimer, dir_pat
+    global temp_stream_saved, file_save_status, key, streamtimer, saved_file_name
     
     path = self.path.split("/")
     if path[1] != 'segments':#allow non-password access to live stream segments
@@ -55,11 +55,11 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     if path[1] == 'engine':
       if len(path) == 3:
         if path[2] == 'start' and enginerunning == False:
-          acestream_to_http_tc.startengine(dir_path)
+          acestream_to_http_tc.startengine()
         elif path[2] == 'stop':
-          acestream_to_http_tc.stopengine(dir_path)
+          acestream_to_http_tc.stopengine()
         elif path[2] == 'stopstream':
-          acestream_to_http_tc.stopenginestream(dir_path)
+          acestream_to_http_tc.stopenginestream()
         time.sleep(5)
         self.send_response(302)
         self.send_header('Location',"/")
@@ -70,11 +70,12 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         if path[2] == 'start':
           if vlcrunning == False:#only start one instance
             temp_stream_saved = False
-            acestream_to_http_tc.startvlc(dir_path, PROTOCOL, USERNAME, PASSWORD, SERVER_IP)
+            saved_file_name = datetime.today().strftime("%Y%b%d-%H%M")
+            acestream_to_http_tc.startvlc(saved_file_name)
         elif path[2] == 'stop':
-          acestream_to_http_tc.stopengine(dir_path)
+          acestream_to_http_tc.stopengine()
           temp_stream_saved = True
-        time.sleep(5)stream_pid
+        time.sleep(5)
         self.send_response(302)
         self.send_header('Location',"/")
         self.end_headers()
@@ -83,15 +84,15 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
       for f in path[2].split("?")[1].split("&"):
         if f.split("=")[0] == "savefilename":
           matchname = f.split("=")[1]
-      acestream_to_http_tc.stopengine(dir_path)
-      acestream_to_http_tc.ffmpeg_transcode(dir_path+"/listings/live_stream_from_start.mp4", dir_path+"/listings/"+matchname+".mp4")
+      acestream_to_http_tc.stopengine()
+      acestream_to_http_tc.ffmpeg_transcode(saved_file_name)
       temp_stream_saved = False
       self.send_response(302)
       self.send_header('Location',"/")
       self.end_headers()
     
     elif path[1] == 'openpid' and len(path)==3 and enginerunning:
-      acestream_to_http_tc.stopvlc(dir_path)
+      acestream_to_http_tc.stopvlc()
       stream_pid = False
       for f in path[2].split("?")[1].split("&"):
         if f.split("=")[0] == "pid":
@@ -261,10 +262,7 @@ body{
       if stream_OK_to_transcode:
         if vlcrunning:
           disabledtext[0] = "disabled style='opacity: 0.4;'"
-          transcode_status_text = """
-          Transcoding<br />Stream: %s://%s/segments/acestream.m3u8<br />
-          Kodi: %s://%s/listings/LIVE.strm<br />
-          """ % (PROTOCOL, SERVER_IP, PROTOCOL, SERVER_IP)
+          transcode_status_text = "Transcoding<br />Stream: {0}://{1}/listings/LIVE.m3u8<br />".format(PROTOCOL, SERVER_IP)
         else:
           disabledtext[1] = "disabled style='opacity: 0.4;'"
           transcode_status_text = "Not Transcoding"
@@ -296,12 +294,12 @@ body{
       self.wfile.write('''
        <div>
        <form method="GET" action="/savefile/" id="savefile">
-       <input type=text name="savefilename" placeholder="Save filename" style="margin-top:20px; margin-bottom:10px;width:300px;" %s><br />
        <button class='button buttonloading' %s onclick='document.getElementById("savefile").submit()'>
        <i class='fa fa-save'></i>Save Recording</button>
        </form>
        </div>
-      ''' % (disabledtext[0], disabledtext[0]))
+      ''' % (disabledtext[0]))
+#       <input type=text name="savefilename" placeholder="Save filename" style="margin-top:20px; margin-bottom:10px;width:300px;" %s><br />
       
 
 def main():
@@ -310,7 +308,7 @@ def main():
   SocketServer.TCPServer.allow_reuse_address = True
   httpd = SocketServer.TCPServer(("", int(PORT)), Handler)
   print "Running on http://%s:%s" % (SERVER_IP, PORT)
-  acestream_to_http_tc.stopengine(dir_path)#start with a clean slate
+  acestream_to_http_tc.stopengine()#start with a clean slate
   httpd.serve_forever()
 
 main()
