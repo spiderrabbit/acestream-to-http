@@ -108,9 +108,9 @@ while True:
             print "{0} not found via {1}".format(m, query)# NEED TO ADD ALTERNATIVE QUERIES TO IMPROVE SEARCH
   else:#is recording started_recording == True:
     if time.time() - unix_start > (3*3600):#recording for 3 hours - stop
-      acestream_to_http_tc.stopengine(dir_path)
+      acestream_to_http_tc.stopengine()
       #process file
-      acestream_to_http_tc.ffmpeg_transcode('{0}/www/listings/{1}_{2}.mp4'.format(dir_path, m, recording_part), '{0}/www/listings/PROCESSED_{1}_{2}.mp4'.format(dir_path, m, recording_part))
+      acestream_to_http_tc.ffmpeg_transcode('{0}_{1}'.format(m, recording_part))
       started_recording = False
       blacklisted_streams = []
       recording_part = 1
@@ -137,7 +137,7 @@ while True:
           blacklisted_streams.append(preferred_stream)
         print "restart"
         #transcode stream that has stopped
-        acestream_to_http_tc.ffmpeg_transcode('{0}/www/listings/{1}_{2}.mp4'.format(dir_path, m, recording_part), '{0}/www/listings/PROCESSED_{1}_{2}.mp4'.format(dir_path, m, recording_part))
+        acestream_to_http_tc.ffmpeg_transcode('{0}_{1}'.format(m, recording_part))
         #find another stream
         preferred_stream = findstream(matchlink)
         recording_part += 1 

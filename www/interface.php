@@ -52,7 +52,26 @@ else if($_GET['action']=='status'){
   echo json_encode($status);
 }
 else if($_GET['action']=='listings'){
-  echo file_get_contents('listings/recordings.json');
+  #echo file_get_contents('listings/recordings.json');
+  ?>
+<rss version="2.0">
+  <channel>
+    <title>Karaoke</title>
+    <link>http://vk-karaoke.appspot.com/rss</link>
+    <description>https://vk.com/vkkar</description>
+    <lastBuildDate>Thu, 23 Jun 2016 16:00:00 GMT</lastBuildDate>
+    <generator>vkkar</generator>
+    <ttl>3600</ttl>
+    <item>
+      <title>test.mp3</title>
+      <link>http://vk-karaoke.appspot.com/u/140%20%D0%A3%D0%B4%D0%B0%D1%80%D0%BE%D0%B2%20%D0%92%20%D0%9C%D0%B8%D0%BD%D1%83%D1%82%D1%83%20-%20%D0%9E%D0%B9%2C%20%D0%9E%D0%B9.mp3</link>
+      <guid isPermaLink="true">344191188</guid>
+      <pubDate>Thu, 23 Jun 2016 16:00:09 GMT</pubDate>
+      <enclosure url="http://cs611223.vk.me/u9488564/audios/d16a787f7d21.mp3?extra=uRsIn3dT8ffJYzFYpd-SkROo9MYP0huTsFTRlxIo70VAer3B4LurmEXPLsrdP_b9DdEKVU15nD1xL5jYBOm3pyN7tF31UysfGZ5bRzlriMzrI_iQt0QhRWynCdeMeCve7V0SQCPL2_Ejiw" length="0" type="audio/mpeg"/>
+    </item>
+  </channel>
+</rss>
+<?php
 }
 // else if($_GET['action']=='listings'){
 //   $recordings = json_decode(file_get_contents('listings/recordings.json'),1);

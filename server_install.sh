@@ -44,7 +44,7 @@ add-apt-repository --yes ppa:certbot/certbot
 apt -y install python-certbot-nginx
 apt update
 apt install -y vlc ffmpeg python-pip curl nginx unzip php7.2-fpm ufw openvpn
-pip install requests psutil mediainfo
+pip install requests psutil mediainfo bs4
 snap install acestreamplayer
 
 sudo -u acestream mkdir -p /home/acestream/acestream-to-http
