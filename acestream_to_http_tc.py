@@ -19,9 +19,13 @@ def startvlc(recording_name):
     "--live-caching", "30000", 
     pid_stat_url['response']['playback_url'], 
     "--sout", 
-    "#duplicate{{dst=std{{access=livehttp{{seglen=5,delsegs=true,numsegs=20,index={0}/listings/LIVE.m3u8,index-url={1}://{2}/segments/{3}-########.ts}},mux=ts{{use-key-frames}},dst={0}/segments/{3}-########.ts}},dst=std{{access=file,mux=ts,dst='{0}/listings/{3}.mp4'}}}}".format(dir_path, PROTOCOL, SERVER_IP, random_segment_name)
+    "#duplicate{{dst=std{{access=livehttp{{seglen=5,delsegs=true,numsegs=20,index={0}/listings/LIVE.m3u8,index-url={1}://{2}/segments/{3}-########.ts}},mux=ts{{use-key-frames}},dst={0}/segments/{3}-########.ts}},dst=std{{access=file,mux=ts,dst='{0}/store/{3}.mp4'}}}}".format(dir_path, PROTOCOL, SERVER_IP, random_segment_name)
   ])
   #store recording title in json
+  if os.path.isfile('{0}/listings/{1}.mp4'.format(dir_path, recording_name)):
+    os.unlink('{0}/listings/{1}.mp4'.format(dir_path, recording_name))
+  os.symlink('{0}/store/{1}.mp4'.format(dir_path,random_segment_name), '{0}/listings/{1}.mp4'.format(dir_path, recording_name))
+
   recordings = recordings_status()
   recordings[random_segment_name] = recording_name
   with open('{0}/listings/recordings.json'.format(dir_path), 'w+') as f: f.write(json.dumps(recordings))
@@ -61,8 +65,8 @@ def ffmpeg_transcode(file_to_transcode):
       recordingfilename = '{}.mp4'.format(f)
   if len(recordingfilename)>0:
     random_segment_name = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8))
-    disk_recording_name = '{0}/listings/{1}'.format(dir_path,recordingfilename)
-    disk_recording_outputfile = '{0}/listings/{1}.mp4'.format(dir_path,random_segment_name)
+    disk_recording_name = '{0}/store/{1}'.format(dir_path,recordingfilename)
+    disk_recording_outputfile = '{0}/store/{1}.mp4'.format(dir_path, random_segment_name)
     #ffmpeg has needed -bsf:a aac_adtstoasc option to fix  PES packet size mismatch, Error parsing ADTS frame header errors only for AAC audio
     info = MediaInfo(filename = disk_recording_name)
     try:
@@ -74,6 +78,9 @@ def ffmpeg_transcode(file_to_transcode):
       file_save_status = ["ffmpeg", "-y", "-i", disk_recording_name, "-c:v", "copy", "-c:a", "copy", "-movflags", "faststart", disk_recording_outputfile]
     subprocess.Popen(file_save_status)
     recordings[random_segment_name] = 'TRANSCODED_{0}'.format(file_to_transcode)
+    if os.path.isfile('{0}/listings/TRANSCODED_{1}.mp4'.format(dir_path, file_to_transcode)):
+      os.unlink('{0}/listings/TRANSCODED_{1}.mp4'.format(dir_path, file_to_transcode))
+    os.symlink(disk_recording_outputfile, '{0}/listings/TRANSCODED_{1}.mp4'.format(dir_path, file_to_transcode))
     with open('{0}/listings/recordings.json'.format(dir_path), 'w+') as f: f.write(json.dumps(recordings))
   return
 
