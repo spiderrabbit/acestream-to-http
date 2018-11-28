@@ -21,7 +21,7 @@ def playstream(stream_pid, recording_name):
     enginerunning=True
   if enginerunning == False:
     acestream_to_http_tc.startengine()
-    time.sleep(5)
+    time.sleep(15)
     
   acestream_to_http_tc.stopvlc()#stop any existing transcoding
   stream_uid = hashlib.sha1(stream_pid).hexdigest()
@@ -32,7 +32,7 @@ def playstream(stream_pid, recording_name):
     #pid_stat_url = [stream_pid, json.loads(r.text)['response']['stat_url'], json.loads(r.text)['response']['playback_url'], r.text, stream_pid]
     with open('/tmp/pid_stat_url', 'w') as f: f.write(json.dumps(out))
 
-    time.sleep(5)
+    time.sleep(15)
 
     acestream_to_http_tc.startvlc(recording_name)
 
