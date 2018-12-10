@@ -126,8 +126,8 @@ while True:
           try:
             result = urllib2.urlopen(request)
             data = json.loads(result.read())          #{u'response': {u'status': u'dl', u'uploaded': 2555904, u'speed_down': 449, u'speed_up': 17, u'playback_session_id': u'faafb1af12aa9b7d161c1648eb1ce95bda1a7043', u'peers': 48, u'total_progress': 0, u'downloaded': 33521664}, u'error': None}
-            if data is not None:
-              if 'status' in data['response']:
+            if data is not None and 'response' in data:
+              if data['response'] is not None and 'status' in data['response']:
                 if data['response']['status']=='dl' and data['response']['speed_down']>100:
                   restart_recording = False
           except urllib2.URLError:
