@@ -48,6 +48,8 @@ pip install requests psutil mediainfo bs4
 snap install acestreamplayer
 
 sudo -u acestream mkdir -p /home/acestream/acestream-to-http
+sudo -u acestream mkdir -p /home/acestream/snap/acestreamplayer/8/.ACEStream
+sudo -u acestream touch /home/acestream/snap/acestreamplayer/8/.ACEStream/acestream.conf
 sudo -u acestream wget -q https://github.com/spiderrabbit/acestream-to-http/archive/master.zip -O /tmp/master.zip
 sudo -u acestream yes | unzip /tmp/master.zip -d /tmp/
 sudo -u acestream rsync -avP /tmp/acestream-to-http-master/ /home/acestream/acestream-to-http/
