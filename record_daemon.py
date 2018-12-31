@@ -97,15 +97,15 @@ while True:
             query = "{}%20OR%20{}".format(hometeam, awayteam)
             data = findmatch(query)# find via either team
           if len(data['data']['children'])>0:#found a match
-            print "found via {}".format(query)
+            print str(datetime.datetime.now()),"found via {}".format(query)
             matchlink = data['data']['children'][0]['data']['url']
             preferred_stream = findstream(matchlink)
-            print preferred_stream
+            print str(datetime.datetime.now()),preferred_stream
             playstream.playstream(preferred_stream, '{0}_{1}'.format(m, recording_part))
             started_recording = True
             break
           else:
-            print "{0} not found via {1}".format(m, query)# NEED TO ADD ALTERNATIVE QUERIES TO IMPROVE SEARCH
+            print str(datetime.datetime.now()),"{0} not found via {1}".format(m, query)# NEED TO ADD ALTERNATIVE QUERIES TO IMPROVE SEARCH
   else:#is recording started_recording == True:
     if time.time() - unix_start > (3*3600):#recording for 3 hours - stop
       acestream_to_http_tc.stopengine()
@@ -114,7 +114,7 @@ while True:
       started_recording = False
       blacklisted_streams = []
       recording_part = 1
-      print "recording finished"
+      print str(datetime.datetime.now()),"recording finished"
     else: #check is recording OK
       restart_recording = True
       engine_failure = False
@@ -130,19 +130,22 @@ while True:
               if data['response'] is not None and 'status' in data['response']:
                 if data['response']['status']=='dl' and data['response']['speed_down']>100:
                   restart_recording = False
+                else:
+                  print str(datetime.datetime.now()),"Stream Failure"
+                  print str(datetime.datetime.now()),data
           except urllib2.URLError:
             engine_failure = True
+            print str(datetime.datetime.now()),"Engine failure: urllib2.URLError"
       if restart_recording:
         if engine_failure == False:#only blacklist non working streams, not if engine failed
           blacklisted_streams.append(preferred_stream)
-        print "restart"
+          print str(datetime.datetime.now()),"Blacklisted: ", blacklisted_streams
+        print str(datetime.datetime.now()),"restart"
         #transcode stream that has stopped
         acestream_to_http_tc.ffmpeg_transcode('{0}_{1}'.format(m, recording_part))
-        #find another stream
-        preferred_stream = findstream(matchlink)
-        recording_part += 1 
-        playstream.playstream(preferred_stream, '{0}_{1}'.format(m, recording_part))
+        recording_part += 1 #increment recording name
+        started_recording = False #search again for stream
       else:
-        print "OK to carry on"
+        print str(datetime.datetime.now()),"OK to carry on"
   time.sleep(60)
 
