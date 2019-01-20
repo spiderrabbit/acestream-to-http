@@ -34,7 +34,8 @@ def getlinks(url):
 
 def findmatch(searchquery):
   #search r/soccerstreams for streams
-  request = urllib2.Request('https://www.reddit.com/r/soccerstreams/search.json?sort=new&restrict_sr=on&limit=1&q={0}'.format(query))
+  #request = urllib2.Request('https://www.reddit.com/r/soccerstreams/search.json?sort=new&restrict_sr=on&limit=1&q={0}'.format(query))
+  request = urllib2.Request('https://www.reddit.com/r/soccerstreams_pl/search.json?sort=new&restrict_sr=on&limit=1&q={0}'.format(query))
   request.add_header('User-agent', 'Kodi soccerstreams bot 0.1')
   data = {'data':{'children':''}}#initialise data variable
   try:
@@ -54,16 +55,31 @@ def findstream(matchlink):
   preferred_stream = ''
   #search verified streamers first
   for verified in [True, False]:
-    for preferred_format in ['720p', 'HD', '1080', 'SD', 'acestream']: 
-      for l in links:
-        if preferred_stream == '':
-          line = l['acestream'].replace("\n",'').strip()
-          if l['verified'] == verified :
-            if re.search(preferred_format,line,re.IGNORECASE):#
-              acestreams = re.findall(r'acestream://([0-9a-z]+)',line)
-              if acestreams: 
-                if preferred_stream not in blacklisted_streams:
-                  preferred_stream = acestreams[0]
+    #search preferred language 
+    for language in ['[EN]','']:
+      for preferred_format in ['1080', '720p', 'HD', 'SD', 'acestream']: 
+        for l in links:#iterate through links
+          if re.match(language,l['acestream']):
+              if l['verified'] == verified :
+                line = l['acestream'].replace("\n",'').strip()
+                if re.search(preferred_format,line,re.IGNORECASE):#
+                  acestreams = re.findall(r'acestream://([0-9a-z]+)',line)
+                  if acestreams: 
+                    if preferred_stream not in blacklisted_streams:
+                      if preferred_stream=='': preferred_stream = acestreams[0]
+  
+  
+  #for verified in [True, False]:
+    #for preferred_format in ['1080', '720p', 'HD', 'SD', 'acestream']: 
+      #for l in links:
+        #if preferred_stream == '':
+          #line = l['acestream'].replace("\n",'').strip()
+          #if l['verified'] == verified :
+            #if re.search(preferred_format,line,re.IGNORECASE):#
+              #acestreams = re.findall(r'acestream://([0-9a-z]+)',line)
+              #if acestreams: 
+                #if preferred_stream not in blacklisted_streams:
+                  #preferred_stream = acestreams[0]
   return preferred_stream
 
 matchlink = ''

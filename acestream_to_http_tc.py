@@ -39,7 +39,8 @@ def stopvlc():
   with open('/tmp/current_recording', 'w') as f: f.write('')#clear current recording file
 
 def startengine():
-  subprocess.Popen(["/snap/bin/acestreamplayer.engine", "--client-console", "--live-cache-type", "disk", "--live-disk-cache-size", "1000000000"])
+  #subprocess.Popen(["/snap/bin/acestreamplayer.engine", "--client-console", "--live-cache-type", "disk", "--live-disk-cache-size", "1000000000"])
+  subprocess.Popen(["/snap/bin/acestreamplayer.engine", "--client-console", "--live-cache-type", "memory"])
   return
   
 def stopengine():
