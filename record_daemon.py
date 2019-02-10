@@ -1,6 +1,8 @@
 import time, datetime, os, json, urllib2, re
 import acestream_to_http_tc
 import playstream
+
+subreddit_name='redditsoccer'
   
 def getreplies(data):
   global links
@@ -35,7 +37,7 @@ def getlinks(url):
 def findmatch(searchquery):
   #search r/soccerstreams for streams
   #request = urllib2.Request('https://www.reddit.com/r/soccerstreams/search.json?sort=new&restrict_sr=on&limit=1&q={0}'.format(query))
-  request = urllib2.Request('https://www.reddit.com/r/soccerstreams_pl/search.json?sort=new&restrict_sr=on&limit=1&q={0}'.format(query))
+  request = urllib2.Request('https://www.reddit.com/r/{0}/search.json?sort=new&restrict_sr=on&limit=1&q={1}'.format(subreddit_name, query))
   request.add_header('User-agent', 'Kodi soccerstreams bot 0.1')
   data = {'data':{'children':''}}#initialise data variable
   try:
